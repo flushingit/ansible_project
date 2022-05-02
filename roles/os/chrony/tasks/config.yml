@@ -30,10 +30,3 @@
 
 - name: sync hwclock
   shell: "hwclock -w -D"
-
-- name: Check NTP is synchronized for 2 minutes
-  shell: "chronyc tracking | grep Stratum | cut -f2 -d | awk '{print($1)}'"
-  register: result
-  until: result.stdout != '10'
-  retries: 24
-  delay: 5

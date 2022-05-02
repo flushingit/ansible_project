@@ -1,13 +1,5 @@
 ---
 
-- name: 'Clean NTP Service'
-  import_tasks: 'clean.yml'
-  tags: [ 'ntp::clean']
-  loop_control:
-    loop_var:
-      - 'chronyd'
-      - 'ntpd'
-
 - name: 'INSTALL | install chrony'
   import_tasks: 'install.yml'
   tags: [ 'chrony', 'chrony::install' ]
