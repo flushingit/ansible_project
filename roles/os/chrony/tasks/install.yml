@@ -1,0 +1,19 @@
+---
+
+- name: Set timezone
+  timezone:
+    name: "{{ timezone }}"
+
+- name: Ensure tzdata is installed
+  yum:
+    name: tzdata
+    state: present
+
+- name: Install and enable Chrony
+  block:
+  - name: Install Chrony
+    yum:
+      name: chrony
+      state: present
+      update_cache: yes
+

@@ -1,0 +1,15 @@
+---
+
+- name: Ensure service is stopped and disabled
+  systemd:
+    name: "{{ prevtype }}"
+    daemon_reload: yes
+    state: stopped
+    enabled: no
+  ignore_errors: yes
+  when: prevtype is defined
+
+- name: Delete packages
+  yum:
+    remove: "{{ prevtype }}"
+  when: prevtype is defined

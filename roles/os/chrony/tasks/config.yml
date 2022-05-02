@@ -1,0 +1,39 @@
+---
+
+- name: ensure service is stopped and enabled
+  systemd:
+    name: chronyd
+    daemon_reload: yes
+    state: stopped
+    enabled: yes
+
+- name: set ntp servers
+  set_fact:
+    ntp_server_list: "{{ ntp_server_list|default([]) + [ ntp_server ] }}"
+  loop: "{{ ntp.servers }}"
+  loop_control:
+    loop_var: ntp_server
+
+- name: Config Chrony
+  block:
+    - name: update Chrony config
+      template:
+        src: chrony.conf.j2
+        dest: /etc/chrony.conf
+
+- name: ensure service is started and enabled
+  systemd:
+    name: chronyd
+    daemon_reload: yes
+    state: started
+    enabled: yes
+
+- name: sync hwclock
+  shell: "hwclock -w -D"
+
+- name: Check NTP is synchronized for 2 minutes
+  shell: "chronyc tracking | grep Stratum | cut -f2 -d | awk '{print($1)}'"
+  register: result
+  until: result.stdout != '10'
+  retries: 24
+  delay: 5
