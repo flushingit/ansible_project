@@ -1,0 +1,5 @@
+---
+
+- name: 'INSTALL | install chrony'
+  import_tasks: 'install.yml'
+  tags: [ 'chrony', 'chrony::install' ]

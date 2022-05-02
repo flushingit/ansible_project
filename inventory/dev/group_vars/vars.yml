@@ -1,0 +1,14 @@
+---
+
+# Packages to install
+
+packages:
+  - epel-release
+  - curl
+  - gdisk
+  - vim
+  - net-tools
+  - tcpdump
+  - traceroute
+  - telnet
+  - wget
