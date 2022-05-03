@@ -4,3 +4,4 @@
   roles:
     - os/packages
     - os/chrony
+    - os/firewalld

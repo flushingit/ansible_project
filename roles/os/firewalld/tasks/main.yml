@@ -1,0 +1,9 @@
+---
+
+- name: 'INSTALL | install firewalld'
+  import_tasks: 'install.yml'
+  tags: [ 'firewalld', 'firewalld::install' ]
+
+- name: 'CONFIG | config chrony'
+  import_tasks: 'config.yml'
+  tags: [ 'firewalld', 'firewalld::config' ]

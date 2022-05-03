@@ -1,0 +1,17 @@
+---
+
+- name: Open {{ firewall.ports }}
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  loop: "{{ firewall.ports }}"
+
+- name: Open {{ firewall.services }} service
+  firewalld:
+    service: "{{ item  }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  loop: "{{ firewall.services }}"
