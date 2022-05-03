@@ -12,3 +12,25 @@ packages:
   - traceroute
   - telnet
   - wget
+
+# Chrony settings
+
+timezone: "Europe/Moscow"
+
+ntp:
+  servers:
+    - pool.ntp.org
+    - 1.ru.pool.ntp.org
+    - 2.ru.pool.ntp.org
+
+# Firewall Settings
+
+firewall:
+  ports:
+    - 22/tcp
+    - 80/tcp
+    - 443/tcp
+
+  services:
+    - http
+    - https

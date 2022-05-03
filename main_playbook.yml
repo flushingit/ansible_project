@@ -5,3 +5,4 @@
     - os/packages
     - os/chrony
     - os/firewalld
+    - os/host_name
