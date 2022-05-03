@@ -6,3 +6,4 @@
     - os/chrony
     - os/firewalld
     - os/host_name
+    - os/logrotate

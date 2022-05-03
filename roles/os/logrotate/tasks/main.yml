@@ -1,0 +1,9 @@
+---
+
+- name: 'INSTALL | install logrotate'
+  import_tasks: 'install.yml'
+  tags: [ 'logrotate', 'logrotate::install' ]
+
+- name: 'CONFIG | config logrotate'
+  import_tasks: 'config.yml'
+  tags: [ 'logrotate', 'logrotate::config' ]

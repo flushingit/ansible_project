@@ -1,0 +1,6 @@
+---
+
+- name: install the latest packages for firewalld
+  yum:
+    name: logrotate
+    state: present
