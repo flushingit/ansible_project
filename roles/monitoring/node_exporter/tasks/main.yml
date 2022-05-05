@@ -1,0 +1,39 @@
+---
+
+- name: Set data dir according to server type
+  block:
+    - name: Create variable
+      set_fact:
+        node_exporter_data: "/home/node_exporter"
+        is_baremetal: true
+
+  tags:
+    - 'node_exporter'
+    - 'node_exporter::cleanup'
+    - 'node_exporter::prerequisites'
+    - 'node_exporter::installation'
+    - 'node_exporter::config'
+
+- name: 'CLEANUP | Delete old data'
+  import_tasks: "cleanup.yml"
+  tags:
+    - 'never'
+    - 'node_exporter::cleanup'
+
+- name: 'INSTALL | Check install prerequisites'
+  import_tasks: "prerequisites.yml"
+  tags:
+    - 'node_exporter'
+    - 'node_exporter::prerequisites'
+
+- name: 'INSTALL | Install node exporter'
+  import_tasks: "install.yml"
+  tags:
+    - 'node_exporter'
+    - 'node_exporter::installation'
+
+- name: 'INSTALL | Configurations'
+  import_tasks: "config.yml"
+  tags:
+    - 'node_exporter'
+    - 'node_exporter::config'

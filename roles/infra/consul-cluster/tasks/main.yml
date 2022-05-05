@@ -1,0 +1,41 @@
+---
+
+- name: Set data dir according to server type
+  block:
+    - name: Create variable
+      set_fact:
+        consul_data_dir: "{{ consul.data_dir }}"
+  tags:
+    - 'consul-cluster'
+    - 'consul-cluster::prerequisites'
+    - 'consul-cluster::installation'
+
+- name: 'CLEANUP | Delete old data'
+  import_tasks: "cleanup.yml"
+  tags:
+    - 'never'
+    - 'consul-cluster::cleanup'
+
+- name: 'INSTALL | Prerequisites Consul-cluster'
+  import_tasks: "prerequisites.yml"
+  tags:
+    - 'consul-cluster'
+    - 'consul-cluster::prerequisites'
+
+- name: 'INSTALL | Install consul-cluster'
+  import_tasks: "install.yml"
+  tags:
+    - 'consul-cluster'
+    - 'consul-cluster::installation'
+
+- name: 'INSTALL | Configurations'
+  import_tasks: "config.yml"
+  tags:
+    - 'consul-cluster'
+    - 'consul-cluster::config'
+
+- name: Consul backup
+  import_tasks: "setup-backup.yml"
+  tags:
+    - 'consul-cluster'
+    - 'consul-cluster::backup'

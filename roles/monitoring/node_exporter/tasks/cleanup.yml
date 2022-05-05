@@ -1,0 +1,50 @@
+---
+
+- name: Systemd
+  block:
+    - name: Ensure if systemd service file exists.
+      stat:
+        path: "{{ systemd_unitdir }}/{{ node_exporter.service }}"
+      register: node_exporter_service
+
+    - name: Stop and disable node_exporter
+      include_role:
+        name: os/systemd
+        tasks_from: "{{ item }}"
+      vars:
+        unit_name: "{{ node_exporter.service }}"
+      loop:
+        - "unit-stop"
+        - "unit-disable"
+      when: node_exporter_service.stat.exists
+
+- name: Users and Groups
+  block:
+    - name: Delete node_exporter user
+      user:
+        name: "{{ node_exporter.user }}"
+        state: absent
+
+    - name: Delete node_exporter group
+      group:
+        name: "{{ node_exporter.group }}"
+        state: absent
+
+- name: Directory clean up
+  block:
+    - name: Delete node_exporter dirs anf files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ logrotate_dir }}/node_exporter"
+        - "{{ node_exporter.bin_sources }}/node_exporter"
+        - "/etc/sysconfig/node_exporter"
+        - "{{ node_exporter_data }}"
+        - "{{ systemd_unitdir }}/{{ node_exporter.service }}"
+        - "{{ node_exporter.logdir }}"
+
+- name: Delete cron for smartmon
+  cron:
+    name: "run smartmon.sh"
+    state: absent

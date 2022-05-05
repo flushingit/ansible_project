@@ -1,0 +1,40 @@
+---
+
+- name: Users and Groups
+  block:
+    - name: Delete consul user
+      user:
+        name: "{{ consul.user }}"
+        state: absent
+
+    - name: Delete consul group
+      group:
+        name: "{{ consul.group }}"
+        state: absent
+
+- name: Systemd
+  block:
+    - name: Ensure if systemd service file exists.
+      stat:
+        path: "{{ systemd_unitdir }}/{{ consul_agent_defaults.service }}"
+      register: consul_service
+
+    - name: Stop and disable consul
+      systemd:
+        name: consul.service
+        state: stopped
+        daemon_reload: yes
+        enabled: no
+      when: consul_service.stat.exists
+
+- name: Directory clean up
+  block:
+    - name: Delete consul dirs anf files
+      file:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ consul.config_dir }}"
+        - "{{ consul.data_dir }}"
+        - "{{ consul.bin_sources }}/consul"
+        - "{{ systemd_unitdir }}/{{ consul_agent_defaults.service }}"

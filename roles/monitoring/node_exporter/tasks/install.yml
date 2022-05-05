@@ -1,0 +1,26 @@
+---
+
+- name: Copy node_exporter installation archive
+  copy:
+    src: "{{ item }}"
+    dest: "{{ node_exporter_data }}/{{ item }}"
+    mode: 0644
+  loop:
+    - "node_exporter-{{ node_exporter.version }}.{{ architecture }}.tar.gz"
+
+- name: Unarchive node exporter
+  unarchive:
+    src: "{{ node_exporter_data }}/node_exporter-{{ node_exporter.version }}.{{ architecture }}.tar.gz"
+    dest: "{{ node_exporter_data }}"
+    remote_src: yes
+
+- name: Copy node_exporter binary
+  copy:
+    src: "{{ item }}/node_exporter"
+    dest: "{{ node_exporter.bin_sources }}/node_exporter"
+    remote_src: yes
+    owner: root
+    group: root
+    mode: 0755
+  loop:
+    - "{{ node_exporter_data }}/node_exporter-{{ node_exporter.version }}.{{ architecture }}"

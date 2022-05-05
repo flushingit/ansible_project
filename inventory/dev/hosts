@@ -1,0 +1,26 @@
+[database]
+db1 ansible_host=192.168.1.100 role=master
+db2 ansible_host=192.168.1.101 role=slave
+db3 ansible_host=192.168.1.102 role=slave
+
+[webservers]
+web1 ansible_host=192.168.1.103
+web2 ansible_host=192.168.1.104 role=prom
+
+
+[appservers]
+app1 ansible_host=192.168.1.105
+
+[consul-cluster:children]
+consul-master
+consul-server
+
+[consul-master]
+db1 ansible_host=192.168.1.100
+
+[consul-server]
+db2 ansible_host=192.168.1.101
+db3 ansible_host=192.168.1.102
+web1 ansible_host=192.168.1.103
+
+

@@ -1,0 +1,44 @@
+---
+- name: collect service facts
+  service_facts:
+
+- name: File processing
+  block:
+    - name: Add config.json file
+      template:
+        src: "config.json.j2"
+        dest: "{{ consul.config_dir }}/config.json"
+        owner: "{{ consul.user }}"
+        group: "{{ consul.group }}"
+        mode: 0750
+      notify: restart consul server
+
+    - name: "Add local.keyring file"
+      template:
+        src: "local.keyring.j2"
+        dest: "{{ consul_data_dir }}/serf/local.keyring"
+        owner: "{{ consul.user }}"
+        group: "{{ consul.group }}"
+        mode: 0750
+      notify: restart consul server
+
+- name: Systemd
+  block:
+    - name: Add consul.service file
+      template:
+        src: "{{ consul_server_defaults.service }}.j2"
+        dest: "{{ systemd_unitdir }}/{{ consul_server_defaults.service }}"
+        owner: root
+        group: root
+        mode: 0644
+      notify: restart consul server
+
+- name: force all notified handlers to run at this point, not waiting for normal sync points
+  meta: flush_handlers
+
+- name: "Check if port 8500 is listening"
+  wait_for:
+    host: "{{ ansible_host | default(inventory_hostname) }}"
+    port: "8500"
+    delay: 20
+    msg: "Timeout waiting for 8500 to respond"

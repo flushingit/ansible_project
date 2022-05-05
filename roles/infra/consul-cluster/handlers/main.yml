@@ -1,0 +1,25 @@
+---
+
+- name: Ensure that consul service unit file exists.
+  stat:
+    path: "{{ systemd_unitdir }}/{{ consul_server_defaults.service }}"
+  register: consul_service
+  listen: restart consul server
+
+- name: Stop consul server service
+  systemd:
+    name: "{{ consul_server_defaults.service }}"
+    daemon_reload: yes
+    state: stopped
+    enabled: yes
+  listen: restart consul server
+  when: consul_service.stat.exists
+
+- name: Start consul server service
+  systemd:
+    name: "{{ consul_server_defaults.service }}"
+    daemon_reload: yes
+    state: started
+    enabled: yes
+  listen: restart consul server
+  when: consul_service.stat.exists

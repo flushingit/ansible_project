@@ -1,0 +1,36 @@
+---
+
+- name: Install and unpack archive
+  block:
+    - name: Create temporary dir
+      set_fact:
+        tempdir: "{{ consul_data_dir }}"
+
+    - name: Copy consul installation archive
+      copy:
+        src: "{{ item }}"
+        dest: "{{ tempdir }}/{{ item }}"
+        mode: 0644
+      loop:
+        - "consul_{{ consul.version }}_{{ architecture }}.zip"
+      when: tempdir is defined
+
+    - name: Unarchive node exporter
+      unarchive:
+        src: "{{ tempdir }}/{{ item }}"
+        dest: "{{ tempdir }}"
+        remote_src: yes
+      loop:
+        - "consul_{{ consul.version }}_{{ architecture }}.zip"
+      when: tempdir is defined
+
+    - name: Copy consul binary
+      copy:
+        src: "{{ tempdir }}/consul"
+        dest: "{{ consul.bin_sources }}/consul"
+        remote_src: yes
+        owner: root
+        group: root
+        mode: 0755
+      when: tempdir is defined
+      notify: restart consul agent

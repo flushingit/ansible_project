@@ -1,0 +1,120 @@
+---
+- name: Populate service facts
+  service_facts:
+
+- name: Logrotate
+  block:
+    - name: Ensure logrotate package is installed and set up
+      include_role:
+        name: os/logrotate
+        tasks_from: install
+
+    - name: Generate logrotate file
+      template:
+        src: "{{ item }}.logrotate.j2"
+        dest: "{{ logrotate.dir }}/{{ item }}"
+        owner: root
+        group: root
+        mode: 0644
+      loop:
+        - node_exporter
+
+- name: File processing
+  block:
+    - name: create node exporter sysconfig file
+      file:
+        dest: "/etc/sysconfig/node_exporter"
+        state: touch
+        owner: "{{ node_exporter.user }}"
+        group: "{{ node_exporter.group }}"
+        mode: 644
+
+- name: File processing (smartmon)
+  block:
+    - name: Sets default ACL for node on data dir
+      acl:
+        path: "{{ node_exporter_data }}"
+        etype: other
+        permissions: rx
+        default: no
+        state: present
+
+    - name: copy gen script for smartmon
+      copy:
+        src: "smartmon.sh"
+        dest: "{{ node_exporter_data }}/config/smartmon.sh"
+        mode: 0755
+
+    - name: registr smartctl path
+      shell: "which smartctl"
+      register: smartctl_path
+
+    - name: Create symbolic link for smartctl
+      file:
+        src: "{{ smartctl_path.stdout }}"
+        dest: "/bin/smartctl"
+        state: link
+
+    - name: Gen smartmon.sh file
+      shell: "{{ node_exporter_data }}/config/smartmon.sh > {{ node_exporter_data }}/text_collector/smart_metrics.prom"
+      args:
+        chdir: "{{ node_exporter_data }}/config"
+      ignore_errors: yes
+
+    - name: Chown smart_metrics.prom file
+      file:
+        path: "{{ node_exporter_data }}/text_collector/smart_metrics.prom"
+        owner: "{{ node_exporter.user }}"
+        group: "{{ node_exporter.group }}"
+        mode: 0644
+
+    - name: Create cron for smartmon
+      cron:
+        name: "run smartmon.sh"
+        minute: "*/2"
+        user: "root"
+        job: "{{ node_exporter_data }}/config/smartmon.sh > {{ node_exporter_data }}/text_collector/smart_metrics.prom"
+
+    - name: Get version of smartctl
+      shell: "smartctl --version | head -n 1"
+      ignore_errors: true
+      register: smartctl
+
+    - name: Debug version of smarctl
+      debug:
+        msg: "{{ smartctl.stdout }} IN {{ hostvars[inventory_hostname].ansible_host }}"
+      when: '"7." not in smartctl.stdout'
+  when: is_baremetal
+
+- name: Consul integration
+  block:
+    - name: Register service in Consul with healthcheck
+      import_role:
+        name: infra/consul_service-register
+      vars:
+        service_name: "node_exporter"
+        check_type: "http"
+        endpoint: "http://{{ hostvars[inventory_hostname].ansible_host }}:{{ node_exporter.port }}/metrics"
+        port: "{{ node_exporter.port }}"
+      when: "'consul.service' in services"
+
+- name: Systemd
+  block:
+    - name: Copy systemd start script
+      template:
+        src: "{{ node_exporter.service }}.j2"
+        dest: "{{ systemd_unitdir }}/{{ node_exporter.service }}"
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: delete /etc/systemd/system file (or symlink) if it exists
+      file:
+        path: "/etc/systemd/system/{{ node_exporter.service }}"
+        state: absent
+
+    - name: Ensure if systemd service file exists.
+      stat:
+        path: "{{ systemd_unitdir }}/{{ node_exporter.service }}"
+      register: node_exporter_service
+

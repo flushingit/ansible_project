@@ -1,0 +1,16 @@
+---
+
+node_exporter:
+  user: node_exporter
+  group: node_exporter
+  home: "/home/node_exporter"
+  version: 1.3.1
+  metrics_dir: "/var/lib/node_exporter/metrics"
+  service: "node_exporter.service"
+  smartd_service: smartd.service
+  consul_service: consul.service
+  bin_sources: "/usr/bin"
+  logdir: "/var/log/node_exporter"
+  port: 9100
+  protocol: tcp
+  smartmon_version: "7"

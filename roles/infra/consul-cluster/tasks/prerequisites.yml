@@ -1,0 +1,48 @@
+---
+
+- service_facts:
+
+- name: Users and Groups
+  block:
+    - name: Add consul group
+      group:
+        name: "{{ consul.group }}"
+        state: present
+
+    - name: Add consul user
+      user:
+        name: "{{ consul.user }}"
+        group: "{{ consul.group }}"
+        system: yes
+        create_home: no
+        home: "/noneexistent"
+        shell: /bin/false
+        state: present
+
+    - name: Delete home directory
+      file:
+        name: "/noneexistent"
+        state: absent
+
+- name: Directory preparation
+  block:
+    - name: Create consul (data|cfg) directories
+      file:
+        name: "{{ item }}"
+        owner: "{{ consul.user }}"
+        group: "{{ consul.group }}"
+        mode: 0755
+        state: directory
+      loop:
+        - "{{ consul.config_dir }}"
+        - "{{ consul_data_dir }}"
+        - "{{ consul_data_dir }}/serf"
+
+    - name: Create consul binary directory
+      file:
+        name: "{{ consul.bin_sources }}"
+        owner: "root"
+        group: "root"
+        mode: 0755
+        state: directory
+

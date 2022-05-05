@@ -1,0 +1,35 @@
+---
+
+- name: Set data dir according to server type
+  block:
+    - name: Create variable
+      set_fact:
+        consul_backup_dir: "{{ consul.data_dir }}/backups"
+
+- name: Directory preparation
+  block:
+    - name: Add backup directory
+      file:
+        name: "{{ consul_backup_dir }}"
+        mode: 0755
+        state: directory
+
+    - name: registr consul path
+      shell: "which consul"
+      register: consul_path
+
+    - name: Add backup-script
+      template:
+        src: "backup-script.sh.j2"
+        dest: "{{ consul.config_dir}}/backup-script.sh"
+        mode: a+x
+
+- name: CronJob to create snapshot backups
+  cron:
+    name: "### daily consul snapshot backup"
+    minute: "0"
+    hour: "8"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    job: sh {{ consul.config_dir}}/backup-script.sh

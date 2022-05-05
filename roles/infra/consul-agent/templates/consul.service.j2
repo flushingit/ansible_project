@@ -1,0 +1,12 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Consul Startup process
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash -c '{{ consul.bin_sources }}/consul agent -config-dir {{ consul.config_dir }}/ '
+TimeoutStartSec=0
+
+[Install]
+WantedBy=default.target

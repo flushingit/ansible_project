@@ -1,0 +1,4 @@
+#!/bin/bash
+{{ consul_path.stdout }} snapshot save {{ consul_backup_dir }}/`date +%d-%m-%Y"_"%H_%M_%S`.snap &&\
+cd {{ consul_backup_dir }} &&
+  ls -t | sed -e '1,180d' | xargs -d '\n' rm

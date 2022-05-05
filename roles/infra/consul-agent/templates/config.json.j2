@@ -1,0 +1,34 @@
+{
+  "client_addr": "0.0.0.0",
+  "bind_addr": "{{ hostvars[inventory_hostname].ansible_host }}",
+  "data_dir": "{{ consul_data_dir }}",
+  "domain": "consul",
+  "enable_script_checks": true,
+  "dns_config": {
+    "enable_truncate": true,
+    "only_passing": true
+  },
+  "enable_syslog": true,
+  "encrypt": "{{ consul.key }}",
+  "leave_on_terminate": false,
+  "log_level": "INFO",
+  "rejoin_after_leave": true,
+  "start_join": [
+  {% for host in groups['consul-cluster']%}
+  {% if loop.last %}"{{ hostvars[host].ansible_host }}"
+  {% else %}
+  "{{ hostvars[host].ansible_host }}",
+  {% endif %}
+  {% endfor %}
+  ],
+  "ui_config": {
+    "enabled": true
+  },
+  "disable_update_check": true,
+  "ports": {
+    "grpc": 8502
+  },
+  "connect": {
+     "enabled": true
+  }
+}
