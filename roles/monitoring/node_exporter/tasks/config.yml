@@ -118,3 +118,12 @@
         path: "{{ systemd_unitdir }}/{{ node_exporter.service }}"
       register: node_exporter_service
 
+
+- name: restart node_exporter
+  service:
+    name: node_exporter
+    state: restarted
+    daemon_reload: yes
+    enabled: yes
+
+
