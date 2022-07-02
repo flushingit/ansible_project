@@ -21,6 +21,17 @@ db1 ansible_host=192.168.1.100
 [consul-server]
 db2 ansible_host=192.168.1.101
 db3 ansible_host=192.168.1.102
-web1 ansible_host=192.168.1.103
+
+# PostgreSQL nodes
+[master]
+192.168.1.100 hostname=db1 postgresql_exists='false'
+
+[replica]
+192.168.1.101 hostname=db2 postgresql_exists='false'
+192.168.1.102 hostname=db3 postgresql_exists='false'
+
+[postgres_cluster:children]
+master
+replica
 
 

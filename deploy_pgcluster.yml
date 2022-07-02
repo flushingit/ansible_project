@@ -1,0 +1,106 @@
+---
+
+- name: Deploy PostgreSQL HA Cluster (based on "Patroni" and "{{ dcs_type }}")
+  hosts: localhost
+  gather_facts: false
+  vars:
+    minimal_ansible_version: 2.7.0
+  tasks:
+    - name: Checking ansible version
+      fail:
+        msg: "Ansible version must be {{ minimal_ansible_version }} or higher"
+      when: ansible_version.full is version(minimal_ansible_version, '<')
+
+
+- hosts: postgres_cluster
+  become: true
+  become_method: sudo
+  gather_facts: true
+  any_errors_fatal: true
+#  vars_files:
+#    - vars/main.yml
+#    - vars/system.yml
+
+  pre_tasks:
+     # For compatibility with Ansible old versions
+    # (support for RockyLinux and AlmaLinux has been added to Ansible 2.11)
+#    - name: Include OS-specific variables
+##      include_vars: "vars/RedHat.yml"
+#      when: ansible_os_family == 'Rocky' or ansible_os_family == 'AlmaLinux'
+#      tags: always
+#
+#    - name: Checking Linux distribution
+#      fail:
+#        msg: "{{ ansible_distribution }} is not supported"
+#      when: ansible_distribution not in os_valid_distributions
+#
+#    - name: Checking version of OS Linux
+#      fail:
+#        msg: "{{ ansible_distribution_version }} of {{ ansible_distribution }} is not supported"
+#      when: ansible_distribution_version is version_compare(os_minimum_versions[ansible_distribution], '<')
+
+  roles:
+#    - role: db/resolv_conf
+#    - role: db/etc_hosts
+    - role: db/add-repository
+    - role: db/packages
+    - role: db/sysctl
+    - role: db/transparent_huge_pages
+    - role: db/pam_limits
+#    - role: db/io-scheduler
+    - role: db/locales
+#    - role: db/copy
+
+- hosts: postgres_cluster
+  gather_facts: true
+  any_errors_fatal: true
+#  vars_files:
+#    - vars/main.yml
+#    - vars/system.yml
+
+  pre_tasks:
+#    - name: Include OS-specific variables
+##      include_vars: "vars/{{ ansible_os_family }}.yml"
+#      when: not ansible_os_family == 'Rocky' and not ansible_os_family == 'AlmaLinux'
+#      tags: always
+#
+#    # For compatibility with Ansible old versions
+#    # (support for RockyLinux and AlmaLinux has been added to Ansible 2.11)
+#    - name: Include OS-specific variables
+#      include_vars: "vars/RedHat.yml"
+#      when: ansible_os_family == 'Rocky' or ansible_os_family == 'AlmaLinux'
+#      tags: always
+
+  roles:
+    - role: db/pg_probackup
+      when: pg_probackup_install|bool
+
+    - role: db/pgbouncer
+      when: pgbouncer_install|bool
+
+    - role: db/patroni
+
+#    - role: vip-manager
+#      when: not with_haproxy_load_balancing|bool and
+#            (cluster_vip is defined and cluster_vip | length > 0)
+
+    # optional
+    - role: db/postgresql-users
+      when: is_master == "true" and postgresql_users | length > 0
+
+    - role: db/postgresql-databases
+      when: is_master == "true" and postgresql_databases | length > 0
+
+    - role: db/postgresql-extensions
+      when: is_master == "true" and postgresql_extensions | length > 0
+
+    - role: db/pgbouncer/userlist
+      when: pgbouncer_install|bool and pgbouncer_generate_userlist|bool
+
+    - role: db/netdata
+      when: netdata_install is defined and netdata_install|bool
+
+    # finish (info)
+    - role: db/deploy-finish
+
+...

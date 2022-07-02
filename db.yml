@@ -1,0 +1,6 @@
+---
+
+- hosts: database
+  ignore_unreachable: true
+  roles:
+    - db

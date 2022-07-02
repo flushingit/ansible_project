@@ -1,6 +1,6 @@
 ---
 
-- hosts: database, webservers, appservers
+- hosts: database #, webservers, appservers
   ignore_unreachable: true
   serial: 1
   roles:
@@ -19,9 +19,9 @@
     - monitoring/node_exporter
 
 #better to specify host, no need to run on each machine every time---> may cause damage on running consul-agents
-- hosts: all, !consul-cluster
-  gather_facts: false
-  ignore_unreachable: true
-  roles:
-    - infra/consul-agent
-    - monitoring/node_exporter
+#- hosts: all, !consul-cluster
+#  gather_facts: false
+#  ignore_unreachable: true
+#  roles:
+#    - infra/consul-agent
+#    - monitoring/node_exporter
