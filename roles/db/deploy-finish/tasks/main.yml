@@ -72,8 +72,7 @@
           - port {{ haproxy_listen_port.replicas_sync }} (read only)  synchronous replica only
           - port {{ haproxy_listen_port.replicas_async }} (read only)  asynchronous replicas only
           - +------------------------------------------------+
-      when: with_haproxy_load_balancing|bool and
-            synchronous_mode|bool
+      when: synchronous_mode|bool
 
     - name: PostgreSQL Cluster connection info
       run_once: true
@@ -84,8 +83,7 @@
           - port {{ haproxy_listen_port.master }} (read/write) master
           - port {{ haproxy_listen_port.replicas }} (read only)  all replicas
           - +------------------------------------------------+
-      when: with_haproxy_load_balancing|bool and
-            not synchronous_mode|bool
+      when: not synchronous_mode|bool
 
     - name: PostgreSQL Cluster connection info
       run_once: true
@@ -95,8 +93,7 @@
           - address (VIP) {{ cluster_vip }}
           - port {{ pgbouncer_listen_port }} (pgbouncer)
           - +------------------------------------------------+
-      when: not with_haproxy_load_balancing|bool and
-            pgbouncer_install|bool
+      when: pgbouncer_install|bool
 
     - name: PostgreSQL Cluster connection info
       run_once: true
@@ -106,8 +103,7 @@
           - address (VIP) {{ cluster_vip }}
           - port {{ postgresql_port }}
           - +------------------------------------------------+
-      when: not with_haproxy_load_balancing|bool and
-            not pgbouncer_install|bool
+      when: not pgbouncer_install|bool
   when: cluster_vip is defined and cluster_vip | length > 0
   ignore_errors: true
   tags: conn_info, cluster_info, cluster_status
@@ -134,7 +130,6 @@
     - name: Create list of nodes
       run_once: true
       set_fact:
-        haproxy_nodes: "{% for host in groups['balancers'] %}{{ hostvars[host]['inventory_hostname'] }}{% if not loop.last %},{% endif %}{% endfor %}"  # noqa 204
         postgres_cluster_nodes: "{% for host in groups['postgres_cluster'] %}{{ hostvars[host]['inventory_hostname'] }}{% if not loop.last %},{% endif %}{% endfor %}"  # noqa 204
 
     - name: PostgreSQL Cluster connection info
@@ -160,8 +155,7 @@
           - port {{ haproxy_listen_port.master }} (read/write) master
           - port {{ haproxy_listen_port.replicas }} (read only)  all replicas
           - +------------------------------------------------+
-      when: with_haproxy_load_balancing|bool and
-            not synchronous_mode|bool
+      when: not synchronous_mode|bool
 
     - name: PostgreSQL Cluster connection info
       run_once: true
@@ -171,8 +165,7 @@
           - address {{ postgres_cluster_nodes }}
           - port {{ pgbouncer_listen_port }} (pgbouncer)
           - +------------------------------------------------+
-      when: not with_haproxy_load_balancing|bool and
-            pgbouncer_install|bool
+      when: pgbouncer_install|bool
 
     - name: PostgreSQL Cluster connection info
       run_once: true
@@ -182,8 +175,7 @@
           - address {{ postgres_cluster_nodes }}
           - port {{ postgresql_port }}
           - +------------------------------------------------+
-      when: not with_haproxy_load_balancing|bool and
-            not pgbouncer_install|bool
+      when: not pgbouncer_install|bool
   ignore_errors: true
   when: cluster_vip is not defined or cluster_vip | length < 1
   tags: conn_info, cluster_info, cluster_status
