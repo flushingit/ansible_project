@@ -11,7 +11,7 @@ platforms:
   - name: 10.172.0.17
     hostname: etcd01
     image: "${IMAGE_NAMESPACE:-geerlingguy}/docker-${IMAGE_DISTRO:-centos8}-ansible:${IMAGE_TAG:-latest}"
-    # docker_networks:  # TODO github.com/ansible-community/molecule/pull/2696
+    # docker_networks:  #
       # - name: test_docker_network
         # ipam_config:
           # - subnet: 10.172.0.0/24
@@ -158,6 +158,5 @@ scenario:
 
 verifier:
   name: ansible
-  enabled: false  # TODO
-
+  enabled: false
 ...

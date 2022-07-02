@@ -153,6 +153,6 @@ scenario:
 
 verifier:
   name: ansible
-  enabled: false  # TODO
+  enabled: false
 
 ...
