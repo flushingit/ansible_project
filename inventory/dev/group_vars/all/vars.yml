@@ -6,19 +6,11 @@ os_valid_distributions:
   - RedHat
   - CentOS
   - Rocky
-  - OracleLinux
-  - Ubuntu
-  - Debian
-  - AlmaLinux
 
 os_minimum_versions:
   RedHat: 7
   CentOS: 7
   Rocky: 8.4
-  OracleLinux: 7
-  Ubuntu: 18.04
-  Debian: 9
-  AlmaLinux: 8.3
 
 architecture : linux_amd64
 systemd_unitdir: /usr/lib/systemd/system
@@ -121,31 +113,15 @@ postgresql_users:
   - {name: "django_test", password: "django_test1234"}
   - {name: "django_test2", password: "django_test1234"}
   - {name: "saleor_test", password: "saleor_test1234"}
-#  - {name: "mydb-user", password: "mydb-user-pass", flags: "SUPERUSER"}
-#  - {name: "", password: "", flags: "NOSUPERUSER"}
-#  - {name: "", password: "", flags: "NOSUPERUSER"}
-#  - {name: "", password: "", flags: "NOLOGIN"}
 
 # (optional) list of databases to be created (if not already exists)
 postgresql_databases:
   - {db: "testapp", encoding: "UTF8", lc_collate: "ru_RU.UTF-8", lc_ctype: "ru_RU.UTF-8", owner: "django_test"}
   - {db: "testapp2", encoding: "UTF8", lc_collate: "ru_RU.UTF-8", lc_ctype: "ru_RU.UTF-8", owner: "django_test2"}
   - {db: "saleor", encoding: "UTF8", lc_collate: "ru_RU.UTF-8", lc_ctype: "ru_RU.UTF-8", owner: "saleor"}
-#  - {db: "mydatabase", encoding: "UTF8", lc_collate: "ru_RU.UTF-8", lc_ctype: "ru_RU.UTF-8", owner: "mydb-user"}
-#  - {db: "", encoding: "UTF8", lc_collate: "en_US.UTF-8", lc_ctype: "en_US.UTF-8", owner: ""}
-#  - {db: "", encoding: "UTF8", lc_collate: "en_US.UTF-8", lc_ctype: "en_US.UTF-8", owner: ""}
 
 # (optional) list of database extensions to be created (if not already exists)
 postgresql_extensions: []
-#  - {ext: "pg_stat_statements", db: "postgres"}
-#  - {ext: "pg_stat_statements", db: "mydatabase"}
-#  - {ext: "pg_stat_statements", db: ""}
-#  - {ext: "pg_stat_statements", db: ""}
-#  - {ext: "pg_repack", db: ""}  # postgresql-<version>-repack package is required
-#  - {ext: "pg_stat_kcache", db: ""}  # postgresql-<version>-pg-stat-kcache package is required
-#  - {ext: "", db: ""}
-#  - {ext: "", db: ""}
-
 
 # postgresql parameters to bootstrap dcs (are parameters for example)
 postgresql_parameters:
@@ -180,8 +156,6 @@ postgresql_parameters:
   - {option: "archive_mode", value: "on"}
   - {option: "archive_timeout", value: "1800s"}
   - {option: "archive_command", value: "cd ."}  # not doing anything yet with WAL-s
-#  - {option: "archive_command", value: "wal-g wal-push %p"}  # archive WAL-s using WAL-G
-#  - {option: "archive_command", value: "pgbackrest --stanza={{ pgbackrest_stanza }} archive-push %p"}  # archive WAL-s using pgbackrest
   - {option: "wal_level", value: "replica"}
   - {option: "wal_keep_size", value: "2GB"}
   - {option: "max_wal_senders", value: "10"}
@@ -220,14 +194,6 @@ postgresql_parameters:
   - {option: "wal_receiver_status_interval", value: "10s"}
   - {option: "idle_in_transaction_session_timeout", value: "10min"}  # reduce this timeout if possible
   - {option: "jit", value: "off"}
-#  - {option: "max_worker_processes", value: "24"}
-#  - {option: "max_parallel_workers", value: "12"}
-#  - {option: "max_parallel_workers_per_gather", value: "2"}
-#  - {option: "max_parallel_maintenance_workers", value: "2"}
-#  - {option: "old_snapshot_threshold", value: "60min"}
-#  - {option: "", value: ""}
-#  - {option: "", value: ""}
-
 
 # specify additional hosts that will be added to the pg_hba.conf
 postgresql_pg_hba:
@@ -235,14 +201,9 @@ postgresql_pg_hba:
   - {type: "local", database: "all", user: "all", address: "", method: "peer"}
   - {type: "host", database: "all", user: "all", address: "127.0.0.1/32", method: "{{ postgresql_password_encryption_algorithm }}"}
   - {type: "host", database: "all", user: "all", address: "::1/128", method: "{{ postgresql_password_encryption_algorithm }}"}
-#  - {type: "host", database: "mydatabase", user: "mydb-user", address: "192.168.0.0/24", method: "{{ postgresql_password_encryption_algorithm }}"}
-#  - {type: "host", database: "all", user: "all", address: "192.168.0.0/24", method: "ident", options: "map=main"}  # use pg_ident
 
 # list of lines that Patroni will use to generate pg_ident.conf
 postgresql_pg_ident: []
-#  - {mapname: "main", system_username: "postgres", pg_username: "backup"}
-#  - {mapname: "", system_username: "", pg_username: ""}
-
 
 # PgBouncer parameters
 pgbouncer_install: true  # or 'false' if you do not want to install and configure the pgbouncer service
@@ -258,10 +219,6 @@ pgbouncer_auth_type: "{{ postgresql_password_encryption_algorithm }}"
 
 pgbouncer_pools:
   - {name: "postgres", dbname: "postgres", pool_parameters: ""}
-#  - {name: "mydatabase", dbname: "mydatabase", pool_parameters: "pool_size=20 pool_mode=transaction"}
-#  - {name: "", dbname: "", pool_parameters: ""}
-#  - {name: "", dbname: "", pool_parameters: ""}
-
 
 # Extended variables (optional)
 patroni_ttl: 30
@@ -270,7 +227,7 @@ patroni_retry_timeout: 10
 patroni_maximum_lag_on_failover: 1048576
 patroni_master_start_timeout: 300
 
-# https://patroni.readthedocs.io/en/latest/replica_bootstrap.html#standby-cluster
+
 patroni_standby_cluster:
   host: ""  # an address of remote master
   port: "5432"  # a port of remote master
@@ -489,25 +446,6 @@ haproxy_install_repo: true  # or 'false' # only for RedHat/CentOS version 7.
 # you can preload the haproxy rpm packages to your YUM repository (in this case specify "haproxy_install_repo: false").
 confd_package_repo: "https://github.com/kelseyhightower/confd/releases/download/v0.16.0/confd-0.16.0-linux-amd64"
 
-# (optional) if haproxy_installation_method: 'src'
-haproxy_major: "1.8"
-haproxy_version: "1.8.25"  # version to build from source
-lua_src_repo: "https://www.lua.org/ftp/lua-5.3.5.tar.gz"  # required for build haproxy
-haproxy_src_repo: "https://www.haproxy.org/download/{{ haproxy_major }}/src/haproxy-{{ haproxy_version }}.tar.gz"
-haproxy_compile_requirements:
-  - unzip
-  - gzip
-  - make
-  - gcc
-  - gcc-c++
-  - pcre-devel
-  - zlib-devel
-  - readline-devel
-  - openssl
-  - openssl-devel
-  - openssl-libs
-  - systemd-devel
-
 # You can also use your own repository for extra packages. You need to preload all the packages and change this URLs.
 installation_method: "repo"  # (default)"repo" or "file"
 
@@ -548,34 +486,6 @@ patroni_pip_package_repo: []
 patroni_rpm_package_repo: []
 #  - "https://github.com/cybertec-postgresql/patroni-packaging/releases/download/1.6.5-1/patroni-1.6.5-1.rhel7.x86_64.rpm"  # (package for RHEL/CentOS 7)
 
-
-# ================================================================================================= #
-# (optional) if installation_method: "file"
-# You can also download the necessary packages into postgresql_cluster/files/ directory.
-# Packages from this directory will be used for installation.
-pip_package_file: "pip-19.2.3.tar.gz"  # https://pypi.org/project/pip/#files
-patroni_pip_requirements_file:
-  - "setuptools-41.2.0.zip"  # https://pypi.org/project/setuptools/#files
-  - "setuptools_scm-3.3.3.tar.gz"  # https://pypi.org/project/setuptools-scm/#files
-  - "urllib3-1.24.3.tar.gz"  # https://pypi.org/project/urllib3/1.24.3/#files
-  - "boto-2.49.0.tar.gz"  # https://pypi.org/project/boto/#files # (interfaces to Amazon Web Services)
-  - "PyYAML-5.1.2.tar.gz"  # https://pypi.org/project/PyYAML/#files
-  - "chardet-3.0.4.tar.gz"  # https://pypi.org/project/chardet/#files # (required for "requests")
-  - "idna-2.8.tar.gz"  # https://pypi.org/project/idna/#files    # (required for "requests")
-  - "certifi-2019.9.11.tar.gz"  # https://pypi.org/project/certifi/#files # (required for "requests")
-  - "requests-2.22.0.tar.gz"  # https://pypi.org/project/requests/#files
-  - "six-1.12.0.tar.gz"  # https://pypi.org/project/six/#files
-  - "kazoo-2.6.1.tar.gz"  # https://pypi.org/project/kazoo/#files
-  - "dnspython-1.16.0.zip"  # https://pypi.org/project/dnspython/#files # (required for "python-etcd")
-  - "python-etcd-0.4.5.tar.gz"  # https://pypi.org/project/python-etcd/#files
-  - "Click-7.0.tar.gz"  # https://pypi.org/project/click/#files
-  - "prettytable-0.7.2.tar.gz"  # https://pypi.org/project/PrettyTable/#files
-  - "pytz-2019.2.tar.gz"  # https://pypi.org/project/pytz/#files # (required for "tzlocal")
-  - "tzlocal-2.0.0.tar.gz"  # https://pypi.org/project/tzlocal/#files
-  - "wheel-0.33.6.tar.gz"  # https://pypi.org/project/wheel/#files
-  - "python-dateutil-2.8.0.tar.gz"  # https://pypi.org/project/python-dateutil/#files
-  - "psutil-5.6.3.tar.gz"  # https://pypi.org/project/psutil/#files
-  - "cdiff-1.0.tar.gz"  # https://pypi.org/project/cdiff/#files
 patroni_pip_package_file:
   - "patroni-1.6.0.tar.gz"  # https://pypi.org/project/patroni/#files
 
@@ -585,15 +495,9 @@ patroni_rpm_package_file: "patroni-1.6.0-1.rhel7.x86_64.rpm"  # (package for RHE
 # additional packages
 etcd_package_file: "etcd-v3.3.15-linux-amd64.tar.gz"  # https://github.com/etcd-io/etcd/releases
 wal_g_package_file: "wal-g.linux-amd64.tar.gz"  # https://github.com/wal-g/wal-g/releases
-vip_manager_package_file: "vip-manager_0.6-1_amd64.rpm"  # https://github.com/cybertec-postgresql/vip-manager/releases
-## (if with_haproxy_load_balancing: true)
-haproxy_package_file: []
-#  - "rh-haproxy18-runtime-3.1-2.el7.x86_64.rpm"
-#  - "rh-haproxy18-haproxy-1.8.17-1.el7.x86_64.rpm"
 confd_package_file: "confd-0.16.0-linux-amd64"  # https://github.com/kelseyhightower/confd/releases
 # (optional) if haproxy_installation_method: 'src'
 lua_src_file: "lua-5.3.5.tar.gz"  # https://www.lua.org/ftp/lua-5.3.5.tar.gz (required for build haproxy)
-haproxy_src_file: "haproxy-1.8.21.tar.gz"  # http://www.haproxy.org/download/1.8/src/
 
 # ------------------------------------------------------------------------------------------------- #
 # (optional) Specify additional rpm packages if required (for any installation_method)
@@ -633,40 +537,6 @@ synchronous_mode: false  # or 'true' for enable synchronous database replication
 synchronous_mode_strict: false  # if 'true' then block all client writes to the master, when a synchronous replica is not available
 synchronous_node_count: 1  # number of synchronous standby databases
 
-# Load Balancing
-with_haproxy_load_balancing: false  # or 'true' if you want to install and configure the load-balancing
-haproxy_listen_port:
-  master: 5000
-  replicas: 5001
-  replicas_sync: 5002
-  replicas_async: 5003
-  stats: 7000
-haproxy_maxconn:
-  global: 100000
-  master: 10000
-  replica: 10000
-haproxy_timeout:
-  client: "60m"
-  server: "60m"
-
-# vip-manager (if cluster_vip is specified and with_haproxy_load_balancing: false)
-vip_manager_version: "1.0.2"  # version to install
-vip_manager_conf: "/etc/patroni/vip-manager.yml"
-vip_manager_interval: "1000"  # time (in milliseconds) after which vip-manager wakes up and checks if it needs to register or release ip addresses.
-vip_manager_iface: "{{ vip_interface }}"  # interface to which the virtual ip will be added
-vip_manager_ip: "{{ cluster_vip }}"  # the virtual ip address to manage
-vip_manager_mask: "24"  # netmask for the virtual ip
-
-
-# DCS (Distributed Consensus Store)
-dcs_exists: false  # or 'true' if you do not want to install and configure the etcd cluster
-dcs_type: "etcd"
-
-# if dcs_exists: false and dcs_type: "etcd"
-etcd_ver: "v3.3.27"  # version for deploy etcd cluster
-etcd_data_dir: "/var/lib/etcd"
-etcd_cluster_name: "etcd-{{ patroni_cluster_name }}"  # ETCD_INITIAL_CLUSTER_TOKEN
-
 # if dcs_exists: true and dcs_type: "etcd" - specify ip address your etcd cluster in the "patroni_etcd_hosts" variable
 # example (use existing cluster of 3 nodes)
 patroni_etcd_hosts: []
@@ -687,14 +557,6 @@ nameservers: []
 etc_hosts: []
 #  - "10.128.64.143 pgbackrest.minio.local minio.local s3.eu-west-3.amazonaws.com"  # example (MinIO)
 #  - ""
-
-ntp_enabled: false  # or 'true' if you want to install and configure the ntp service
-ntp_servers: []
-#  - "10.128.64.44"
-#  - "10.128.64.45"
-
-#timezone: ""
-# timezone: "Europe/Moscow"
 
 # Generate locale
 # (except RHEL>=8,use glibc-langpack)
@@ -762,24 +624,6 @@ soft_nofile: 65536
 hard_nofile: 200000
 
 
-# I/O Scheduler (optional)
-set_scheduler: false  # or 'true'
-scheduler:
-  - {sched: "deadline", nr_requests: "1024", device: "sda"}
-#  - {sched: "noop" , nr_requests: "1024", device: "sdb"}
-#  - {sched: "" , nr_requests: "1024", device: ""}
-
-# Non-multiqueue I/O schedulers:
-# cfq         - for desktop systems and slow SATA drives
-# deadline    - for SAS drives (recommended for databases)
-# noop        - for SSD drives
-# Multiqueue I/O schedulers (blk-mq):
-# mq-deadline - (recommended for databases)
-# none        - (ideal for fast random I/O devices such as NVMe)
-# bfq         - (avoid for databases)
-# kyber
-
-
 # SSH Keys (optional)
 enable_ssh_key_based_authentication: false  # or 'true' for configure SSH Key-Based Authentication
 ssh_key_user: "postgres"
@@ -795,49 +639,6 @@ sudo_users:
 #  - name: "joe" # other user (example)
 #    nopasswd: "no"
 #    commands: "/usr/bin/find, /usr/bin/less, /usr/bin/tail, /bin/kill"
-
-
-# Firewall (ansible-role-firewall)
-firewall_enabled_at_boot: true
-
-firewall_allowed_tcp_ports_for:
-  master: []
-  replica: []
-  postgres_cluster:
-    - "{{ ansible_ssh_port | default(22) }}"
-    - "{{ postgresql_port }}"
-    - "{{ pgbouncer_listen_port }}"
-    - "8008"  # Patroni REST API port
-    - "19999"  # Netdata
-#    - "10050"  # Zabbix agent
-#    - ""
-  etcd_cluster:
-    - "{{ ansible_ssh_port | default(22) }}"
-    - "2379"  # ETCD port
-    - "2380"  # ETCD port
-#    - ""
-  balancers:
-    - "{{ ansible_ssh_port | default(22) }}"
-    - "{{ haproxy_listen_port.master }}"  # HAProxy (read/write) master
-    - "{{ haproxy_listen_port.replicas }}"  # HAProxy (read only) all replicas
-    - "{{ haproxy_listen_port.replicas_sync }}"  # HAProxy (read only) synchronous replica only
-    - "{{ haproxy_listen_port.replicas_async }}"  # HAProxy (read only) asynchronous replicas only
-    - "{{ haproxy_listen_port.stats }}"  # HAProxy stats
-#    - ""
-
-firewall_additional_rules_for:
-  master: []
-  replica: []
-  postgres_cluster: []
-  etcd_cluster: []
-  balancers:
-    - "iptables -p vrrp -A INPUT -j ACCEPT"  # Keepalived (vrrp)
-    - "iptables -p vrrp -A OUTPUT -j ACCEPT"  # Keepalived (vrrp)
-
-# disable firewalld (installed by default on RHEL/CentOS) or ufw (installed by default on Ubuntu)
-firewall_disable_firewalld: true
-firewall_disable_ufw: true
-
 
 # (optional) - Fetch files from the server in the "master" group. These files can later be copied to all servers.
 fetch_files_from_master: []
