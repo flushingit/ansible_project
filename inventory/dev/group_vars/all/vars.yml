@@ -652,4 +652,20 @@ copy_files_to_all_server: []
 #  - {src: "files/ssl-cert-snakeoil.key", dest: "/etc/ssl/private/ssl-cert-snakeoil.key", owner: "postgres", group: "postgres", mode: "0600"}
 #  - {src: "files/myfile", dest: "/path/to/myfile", owner: "postgres", group: "postgres", mode: "0640"}
 
+#Prometheus
+prometheus:
+  user: prometheus
+  group: prometheus
+  version: 2.32.1
+  remove_src: true
+  dir: "/etc/prometheus"
+  targets_dir: "/etc/prometheus/targets"
+  alerts_dir: "/etc/prometheus/alerts"
+  bin_sources: "/data/prometheus-sources"
+  download_dir: "/data/downloads"
+  log: /var/log/prometheus/prometheus.log
+  storage: /home/prometheus/data
+  retention_time: 7d
+
+
 
