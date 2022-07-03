@@ -1,0 +1,52 @@
+---
+
+- service_facts:
+
+- name: grafana group
+  group:
+    name: "{{ grafana.group | default(grafana_defaults.group) }}"
+    state: present
+
+- name: grafana user
+  user:
+    name: "{{ grafana.user | default(grafana_defaults.user) }}"
+    group: "{{ grafana.group | default(grafana_defaults.group) }}"
+
+- name: Add grafana directories
+  file:
+    name: "{{ item }}"
+    owner: "{{ grafana.user | default(grafana_defaults.user) }}"
+    group: "{{ grafana.group | default(grafana_defaults.group) }}"
+    recurse: yes
+    state: directory
+  loop:
+    - "{{ grafana.dir | default(grafana_defaults.dir) }}"
+    - "{{ grafana.download_dir | default(grafana_defaults.download_dir) }}"
+    - "{{ grafana.plugins_dir | default(grafana_defaults.plugins_dir) }}"
+    - "{{ grafana_defaults.log_dir }}"
+    - "{{ grafana_defaults.lib_dir }}"
+
+- name: Firewalld
+  block:
+    - name: Open port firewalld
+      firewalld:
+        port: "{{ item  }}"
+        permanent: yes
+        state: enabled
+      loop:
+        - "3000/tcp"
+
+    - name: Open http service
+      firewalld:
+        service: "{{ item  }}"
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop:
+        - "http"
+        - "https"
+
+    - name: Reload firewalld service
+      command: firewall-cmd --reload
+  when: "'firewalld.service' in ansible_facts.services"
+  ignore_errors: true

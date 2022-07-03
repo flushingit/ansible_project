@@ -1,0 +1,22 @@
+---
+
+grafana_defaults:
+  service: grafana-server.service
+  group: grafana
+  user: grafana
+  dir: "/etc/grafana"
+  log: /var/log/grafana/grafana.log
+  log_dir: /var/log/grafana/
+  lib_dir: /var/lib/grafana/
+  download_dir: /data/downloads
+  rpm: grafana-8.2.0-1.x86_64
+  smtp_host: smtp.yandex.com
+  smtp_port: 465
+  admin_user: admin
+  admin_password: admin1234
+  plugins_list:
+    - "vertamedia-clickhouse-datasource"
+    - "grafana-clock-panel"
+    - "grafana-piechart-panel"
+    - "flant-statusmap-panel"
+  plugins_dir: /var/lib/grafana/plugins

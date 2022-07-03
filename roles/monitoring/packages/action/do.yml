@@ -1,0 +1,7 @@
+---
+
+- name: "{{ package_action|title }} package(s) for {{ ansible_distribution }} {{ ansible_distribution_version }}"
+  dnf:
+    name: "{{ package_name.split(',') }}"
+    state: "{{ package_state }}"
+    disable_gpg_check: yes

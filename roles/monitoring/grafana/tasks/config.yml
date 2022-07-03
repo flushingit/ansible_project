@@ -1,0 +1,54 @@
+---
+
+- name: Logrotate configuration
+  template:
+    src: "{{ item }}.logrotate.j2"
+    dest: "{{ logrotate.dir }}/{{ item }}"
+    mode: 0750
+  with_items:
+    - grafana
+  notify: restart grafana
+
+- name: Copy configuration file
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ grafana.dir | default(grafana_defaults.dir) }}/{{ item }}"
+    mode: 0644
+    owner: "{{ grafana.user | default(grafana_defaults.user) }}"
+    group: "{{ grafana.group | default(grafana_defaults.group) }}"
+  with_items:
+    - grafana.ini
+  notify: restart grafana
+
+#- name: Change admin password
+#  shell: "grafana-cli admin reset-admin-password {{ grafana_defaults.admin_password }}"
+
+- name: Get installed plugins
+  shell: "ls -l | awk '{print $9}'"
+  args:
+    chdir: "{{ grafana_defaults.plugins_dir }}"
+  register: installed_plugins
+
+- name: Install absent plugins
+  include_tasks: "install_plugins.yml"
+  loop: "{{ grafana_defaults.plugins_list }}"
+
+- name: Add grafana directories
+  file:
+    name: "{{ item }}"
+    owner: "{{ grafana.user | default(grafana_defaults.user) }}"
+    group: "{{ grafana.group | default(grafana_defaults.group) }}"
+    recurse: yes
+    state: directory
+  loop:
+    - "{{ grafana.dir | default(grafana_defaults.dir) }}"
+    - "{{ grafana.download_dir | default(grafana_defaults.download_dir) }}"
+    - "{{ grafana.plugins_dir | default(grafana_defaults.plugins_dir) }}"
+    - "{{ grafana_defaults.log_dir }}"
+    - "{{ grafana_defaults.lib_dir }}"
+
+- name: Restart grafana
+  shell: "service grafana-server restart"
+
+- name: force all notified handlers to run at this point, not waiting for normal sync points
+  meta: flush_handlers

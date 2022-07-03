@@ -1,0 +1,26 @@
+---
+
+- hosts: appservers, database , webservers,
+  ignore_unreachable: true
+  serial: 1
+  roles:
+    - os/packages
+    - os/chrony
+    - os/firewalld
+    - os/host_name
+    - os/logrotate
+
+- hosts: consul-cluster
+  gather_facts: false
+  serial: 1
+  ignore_unreachable: true
+  roles:
+    - infra/consul-cluster
+    - monitoring/node_exporter
+
+- hosts: consul-agent
+  gather_facts: false
+  ignore_unreachable: true
+  roles:
+    - infra/consul-agent
+    - monitoring/node_exporter

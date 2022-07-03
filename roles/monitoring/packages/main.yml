@@ -1,0 +1,6 @@
+---
+
+- name: "{{ package_action|title }} packages"
+  include_tasks: "action/do.yml"
+  vars:
+    package_name: "{{ package_listt|join(',') }}"

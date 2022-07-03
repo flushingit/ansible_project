@@ -1,0 +1,30 @@
+---
+
+- name: 'INSTALL | Check grafana prerequisites'
+  import_tasks: "prerequisites.yml"
+  tags:
+    - 'grafana'
+    - 'grafana::prerequisites'
+
+- name: 'INSTALL | Install grafana'
+  import_tasks: "install.yml"
+  tags:
+    - 'grafana'
+    - 'grafana::install'
+
+- name: 'INSTALL | Configurations'
+  import_tasks: "config.yml"
+  tags:
+        - 'grafana'
+        - 'grafana::config'
+
+- name: 'INSTALL | Firewalld rules'
+  import_tasks: "firewalld.yml"
+  tags:
+        - 'grafana'
+        - 'grafana::firewalld'
+
+- name: 'INSTALL | Update version'
+  import_tasks: "install.yml"
+  tags:
+        - 'grafana::update'

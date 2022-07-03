@@ -1,0 +1,8 @@
+---
+
+- name: Ensure that grafana service unit file exists.
+  stat:
+    path: "{{ systemd_unitdir }}/{{ grafana_defaults.service }}"
+  register: grafana_service
+  listen: restart grafana
+

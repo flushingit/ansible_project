@@ -1,0 +1,50 @@
+---
+
+- service_facts:
+
+- name: Add prometheus user
+  user:
+    name: "{{ prometheus.user }}"
+    system: true
+    create_home: false
+    shell: /bin/false
+
+- name: Add prometheus directories
+  file:
+    name: "{{ item }}"
+    owner: "{{ prometheus.user }}"
+    group: "{{ prometheus.group }}"
+    mode: 0750
+    state: directory
+  loop:
+    - "{{ prometheus.bin_sources }}"
+    - "{{ prometheus.alerts_dir }}"
+    - "{{ prometheus.dir }}"
+    - "{{ prometheus.download_dir }}"
+    - "{{ prometheus.storage }}"
+    - "{{ prometheus.targets_dir }}"
+
+- name: Firewalld
+  block:
+    - name: Open port firewalld
+      firewalld:
+        port: "{{ item  }}"
+        permanent: yes
+        state: enabled
+      loop:
+        - "9090/tcp"
+
+    - name: Open http service
+      firewalld:
+        service: "{{ item  }}"
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop:
+        - "http"
+        - "https"
+
+    - name: Reload firewalld service
+      command: firewall-cmd --reload
+  when: "'firewalld.service' in ansible_facts.services"
+  ignore_errors: true

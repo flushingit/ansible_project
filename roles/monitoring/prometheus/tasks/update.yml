@@ -1,0 +1,88 @@
+---
+
+- name: stop prometheus
+  systemd:
+    name: "prometheus.service"
+    state: stopped
+    daemon_reload: yes
+    enabled: yes
+  tags:
+    - prometheus::update
+
+- name: Clean binaries
+  file:
+    state: absent
+    path: "{{ prometheus.bin_sources }}/{{ item }}"
+  loop:
+    - prometheus
+    - promtool
+  tags:
+    - prometheus::update
+
+- name: Clean artifact path
+  file:
+    state: absent
+    path: "{{ prometheus.bin_sources }}/{{ item }}"
+  loop:
+    - consoles
+    - console_libraries
+  tags:
+    - prometheus::update
+
+- name: Locate prometheus
+  copy:
+    src: "{{ item }}"
+    dest: "{{ prometheus.download_dir }}"
+    mode: 0755
+  with_items:
+    - "prometheus-{{ prometheus.version }}.{{ architecture }}.tar.gz"
+  tags:
+    - prometheus
+    - prometheus::update
+
+- name: Unarchive prometheus release
+  unarchive:
+    src: "{{ prometheus.download_dir }}/prometheus-{{ prometheus.version }}.{{ architecture }}.tar.gz"
+    dest: "{{ prometheus.bin_sources }}"
+    creates: "{{ prometheus.bin_sources }}/prometheus"
+    remote_src: true
+    extra_opts: [--strip-components=1]
+  tags:
+    - prometheus
+
+- name: Copy files to /usr/local/bin directories
+  copy:
+    src: "{{ prometheus.bin_sources }}/{{ item }}"
+    dest: /usr/local/bin/{{ item }}
+    remote_src: true
+    owner: "{{ prometheus.user }}"
+    group: "{{ prometheus.group }}"
+    mode: 0755
+  loop:
+    - prometheus
+    - promtool
+  tags:
+    - prometheus
+
+- name: Move files to /etc/prometheus
+  copy:
+    src: "{{ prometheus.bin_sources }}/{{ item }}"
+    dest: /etc/prometheus/{{ item }}
+    remote_src: true
+    owner: "{{ prometheus.user }}"
+    group: "{{ prometheus.group }}"
+    mode: 0755
+  loop:
+    - consoles
+    - console_libraries
+  tags:
+    - prometheus
+
+- name: start prometheus
+  systemd:
+    name: "prometheus.service"
+    state: started
+    daemon_reload: yes
+    enabled: yes
+  tags:
+    - prometheus::update

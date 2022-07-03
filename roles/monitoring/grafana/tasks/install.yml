@@ -1,0 +1,17 @@
+---
+
+- name: Locate grafana
+  copy:
+    src: "{{ item }}"
+    dest: "{{ grafana.download_dir | default(grafana_defaults.download_dir) }}"
+    mode: 0755
+#    remote_src: true
+  with_items:
+    - "{{ grafana.rpm | default(grafana_defaults.rpm) }}.rpm"
+
+- name: install grafana
+  dnf:
+    name: "{{ grafana.download_dir | default(grafana_defaults.download_dir) }}/{{ grafana.rpm | default(grafana_defaults.rpm) }}.rpm"
+    state: present
+    disable_gpg_check: yes
+  #      - "{{ grafana.download_dir | default(grafana_defaults.download_dir) }}/{{ grafana.rpm | default(grafana_defaults.rpm) }}.rpm"

@@ -1,0 +1,20 @@
+---
+
+- service_facts:
+
+- name: Open port firewalld
+  block:
+    - name: Add port to firewalld
+      firewalld:
+        port: "{{ item }}"
+        permanent: yes
+        state: enabled
+      loop:
+        - 3000/tcp
+
+    - name: Reload firewalld
+      shell: firewall-cmd --reload
+      ignore_errors: true
+  when:
+    - "'firewalld.service' in ansible_facts.services"
+    - "ansible_facts.services['firewalld.service'].status != 'masked'"

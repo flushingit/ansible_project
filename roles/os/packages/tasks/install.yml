@@ -2,6 +2,6 @@
 
 - name: Install {{ packages }}
   yum:
-    name: "{{ packages }}"
+    name: "{{ item }}"
     state: present
   loop: "{{ packages }}"

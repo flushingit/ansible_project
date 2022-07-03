@@ -1,0 +1,25 @@
+---
+
+- name: Ensure that prometheus service unit file exists.
+  stat:
+    path: "{{ systemd_unitdir }}/prometheus.service"
+  register: prometheus_service
+  listen: restart prometheus
+
+- name: Stop prometheus service
+  systemd:
+    name: "prometheus.service"
+    daemon_reload: yes
+    state: stopped
+    enabled: no
+  listen: restart prometheus
+  when: prometheus_service.stat.exists
+
+- name: Start prometheus service
+  systemd:
+    name: "prometheus.service"
+    daemon_reload: yes
+    state: started
+    enabled: yes
+  listen: restart prometheus
+  when: prometheus_service.stat.exists

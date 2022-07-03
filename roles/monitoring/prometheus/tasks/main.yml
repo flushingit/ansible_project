@@ -1,0 +1,24 @@
+---
+
+- name: 'INSTALL | Install Prometheus'
+  import_tasks: "prerequisites.yml"
+  tags:
+    - 'prometheus'
+    - 'prometheus::prerequisites'
+
+- name: 'INSTALL | Install Prometheus'
+  import_tasks: "install.yml"
+  tags:
+    - 'prometheus'
+    - 'prometheus::installation'
+
+- name: 'INSTALL | Configurations'
+  import_tasks: "config.yml"
+  tags:
+    - 'prometheus'
+    - 'prometheus::config'
+
+#- name: 'UPDATE | Update prometheus version'
+#  import_tasks: "update.yml"
+#  tags:
+#    - 'prometheus::update'

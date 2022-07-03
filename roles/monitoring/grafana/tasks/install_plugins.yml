@@ -1,0 +1,9 @@
+---
+
+- name: Stop grafana
+  shell: "service grafana-server stop"
+  when: 'item not in installed_plugins.stdout_lines'
+
+- name: Install plugin {{ item }}
+  shell: "grafana-cli plugins install {{ item }}"
+  when: 'item not in installed_plugins.stdout_lines'

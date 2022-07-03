@@ -1,0 +1,9 @@
+{{ grafana.log | default(grafana_defaults.log) }} {
+  size 10M
+  rotate 1
+  compress
+  delaycompress
+  notifempty
+  copytruncate
+  missingok
+}

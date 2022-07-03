@@ -1,0 +1,75 @@
+# {{ ansible_managed }}
+global:
+  scrape_interval: 10s
+  scrape_timeout: 10s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+    - targets: ['{{ansible_host}}:9090']
+
+  - job_name: 'node_exporter'
+    scrape_interval: 5s
+    scrape_timeout: 5s
+    metrics_path: /metrics
+    scheme: http
+    consul_sd_configs:
+    - server: 127.0.0.1:8500
+      tag_separator: ','
+      scheme: http
+      services:
+        - 'node_exporter'
+      allow_stale: true
+      refresh_interval: 30s
+    relabel_configs:
+    - source_labels: [__meta_consul_service]
+      separator: ';'
+      regex: '(.*)'
+      target_label: job
+      replacement: $1
+      action: replace
+    - source_labels: [__meta_consul_tags]
+      separator: ','
+      regex: ',(.*),'
+      target_label: env
+      replacement: $1
+      action: replace
+    - source_labels: [__meta_consul_node]
+      separator: ';'
+      regex: '(.*)'
+      target_label: alias
+      replacement: $1
+      action: replace
+
+  - job_name: 'django_exporter'
+    scrape_interval: 5s
+    scrape_timeout: 5s
+    metrics_path: /metrics
+    scheme: http
+    consul_sd_configs:
+    - server: 127.0.0.1:8500
+      tag_separator: ','
+      scheme: http
+      services:
+        - 'django_exporter'
+      allow_stale: true
+      refresh_interval: 30s
+    relabel_configs:
+    - source_labels: [__meta_consul_service]
+      separator: ';'
+      regex: '(.*)'
+      target_label: job
+      replacement: $1
+      action: replace
+    - source_labels: [__meta_consul_tags]
+      separator: ','
+      regex: ',(.*),'
+      target_label: env
+      replacement: $1
+      action: replace
+    - source_labels: [__meta_consul_node]
+      separator: ';'
+      regex: '(.*)'
+      target_label: alias
+      replacement: $1
+      action: replace

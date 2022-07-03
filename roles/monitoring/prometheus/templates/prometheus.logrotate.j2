@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+{{prometheus.log}} {
+    size 10M
+    rotate 1
+    copytruncate
+    compress
+    delaycompress
+    notifempty
+    missingok
+}

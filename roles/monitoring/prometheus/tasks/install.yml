@@ -1,0 +1,40 @@
+---
+
+- name: Locate prometheus
+  copy:
+    src: "{{ item }}"
+    dest: "{{ prometheus.download_dir }}"
+    mode: 0755
+  with_items:
+    - "prometheus-{{ prometheus.version }}.{{ architecture }}.tar.gz"
+
+- name: Unarchive prometheus release
+  unarchive:
+    src: "{{ prometheus.download_dir }}/prometheus-{{ prometheus.version }}.{{ architecture }}.tar.gz"
+    dest: "{{ prometheus.bin_sources }}"
+    remote_src: true
+    extra_opts: [--strip-components=1]
+
+- name: Copy files to /usr/local/bin directories
+  copy:
+    src: "{{ prometheus.bin_sources }}/{{ item }}"
+    dest: /usr/local/bin/{{ item }}
+    remote_src: true
+    owner: "{{ prometheus.user }}"
+    group: "{{ prometheus.group }}"
+    mode: 0755
+  loop:
+    - prometheus
+    - promtool
+
+- name: Move files to /etc/prometheus
+  copy:
+    src: "{{ prometheus.bin_sources }}/{{ item }}"
+    dest: /etc/prometheus/{{ item }}
+    remote_src: true
+    owner: "{{ prometheus.user }}"
+    group: "{{ prometheus.group }}"
+    mode: 0755
+  loop:
+    - consoles
+    - console_libraries
