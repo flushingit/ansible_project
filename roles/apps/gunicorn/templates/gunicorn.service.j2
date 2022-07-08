@@ -1,0 +1,14 @@
+[Unit]
+Description=gunicorn daemon
+After=network.target consul.service
+
+[Service]
+Restart=always
+WorkingDirectory={{ project.name_path }}
+ExecStart={{ project.name_path }}/env/bin/gunicorn \
+          --workers {{ gunicorn_default.workers }} \
+          --bind 0.0.0.0:{{ gunicorn_default.port }} \
+          --access-logfile - \
+          {{ project.name }}.wsgi:application
+[Install]
+WantedBy=multi-user.target

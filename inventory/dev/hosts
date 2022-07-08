@@ -39,4 +39,6 @@ web2 ansible_host=192.168.1.104
 master
 replica
 
+[vip_pg]
+192.168.1.100
 

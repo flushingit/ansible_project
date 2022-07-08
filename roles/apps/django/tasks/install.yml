@@ -1,0 +1,71 @@
+---
+
+
+- name: Pull app source code from repo
+  git:
+    repo: "{{ project.repo }}"
+    dest: "{{ project.name_path }}"
+    force: yes
+    version: master
+
+- name: Create Settings File for Django
+  template:
+    src: 'settings.py.j2'
+    dest: "{{ project.name_path }}/{{ project.name }}/settings.py"
+
+- name: Make executable manage.py
+  file:
+    path: "{{ project.name_path }}/manage.py"
+    mode: 0777
+
+- name: install the package, force upgrade
+  pip:
+    name: pip
+    executable: pip3
+    state: latest
+
+- name: Install virtualenv via pip
+  pip:
+    name: virtualenv
+    executable: pip3
+
+- name: Setup Virtual Env
+  pip:
+    requirements: "{{ project.name_path }}/requirements.txt"
+    virtualenv: "{{ project.name_path }}/env"
+    virtualenv_command: 'python3 -m venv'
+
+- name: install the package, force upgrade
+  pip:
+    name: "{{ item }}"
+    virtualenv: "{{ project.name_path }}/env"
+    state: latest
+  with_items:
+    - 'psycopg2'
+    - 'consul_kv'
+
+- name: Install specified python requirements in indicated (virtualenv)
+  pip:
+    virtualenv: "{{ project.name_path }}/env"
+    requirements: "{{ project.name_path }}/requirements.txt"
+
+- name: apply django migrations
+  django_manage:
+    command: makemigrations
+    app_path: "{{ project.name_path }}"
+    settings: "{{ project.name }}.settings"
+    virtualenv: "{{ project.name_path }}/env"
+
+- name: apply django migrate
+  django_manage:
+    command: migrate
+    app_path: "{{ project.name_path }}"
+    settings: "{{ project.name }}.settings"
+    virtualenv: "{{project.name_path}}/env"
+
+- name: Create default user
+  django_manage:
+    command: shell -c "from django.contrib.auth.hashers import make_password; from django.contrib.auth import get_user_model; MyUser = get_user_model(); MyUser.objects.filter( username__exact = '{{ django_default.user_name }}' ).count() == 0 or exit(); new_super_user = MyUser( username = '{{ django_default.user_name }}', email='{{ django_default.email }}', is_superuser = True, is_staff = True ); new_super_user.password = make_password('{{ django_default.user_password }}'); new_super_user.save();"
+    app_path: "{{ project.name_path }}"
+    virtualenv: "{{ project.name_path }}/env"
+  ignore_errors: true

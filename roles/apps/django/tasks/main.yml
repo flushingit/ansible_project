@@ -1,0 +1,9 @@
+---
+
+- name: 'PREREQUISITES | prerequisites django'
+  import_tasks: "prerequisites.yml"
+  tags: ['django', 'django::prerequisites']
+
+- name: 'INSTALL | install django'
+  import_tasks: "install.yml"
+  tags: ['django', 'django::install']

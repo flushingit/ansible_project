@@ -1,0 +1,11 @@
+---
+
+- name: Replace a localhost entry with our own
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ hostvars[item].ansible_host }} {{ hostvars[item].inventory_hostname }}"
+    owner: root
+    group: root
+    mode: '0644'
+  with_items: "{{ groups['database'] }}"
+

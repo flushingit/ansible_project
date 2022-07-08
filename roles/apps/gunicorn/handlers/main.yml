@@ -1,0 +1,21 @@
+---
+- name: daemon reload gunicorn
+  systemd:
+    daemon_reload: true
+  listen: restart gunicorn
+
+- name: stop gunicorn
+  service:
+    name: gunicorn
+    state: stopped
+    enabled: yes
+  listen: restart gunicorn
+  become: yes
+
+- name: start gunicorn
+  service:
+    name: gunicorn
+    state: started
+    enabled: yes
+  listen: restart gunicorn
+  become: yes

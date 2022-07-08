@@ -1,0 +1,7 @@
+---
+
+- name: 'INSTALL | install gunicorn'
+  import_tasks: "install.yml"
+  tags: ['gunicorn', 'gunicorn::install']
+
+

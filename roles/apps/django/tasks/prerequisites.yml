@@ -1,0 +1,27 @@
+---
+
+- name: Install prereq packages
+  dnf:
+    name: git
+    state: present
+
+- name: Install prereq packages
+  yum:
+    name: postgresql-libs
+    state: present
+
+- name: Install prereq packages
+  yum:
+    name: postgresql-devel
+    state: present
+
+- name: Prepare step for django
+  block:
+    - name: create directory for django files
+      file:
+        path: "{{ project.name_path }}"
+        state: directory
+        mode: 0755
+        owner: root
+        group: root
+

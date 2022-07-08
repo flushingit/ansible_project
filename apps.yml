@@ -1,0 +1,8 @@
+---
+
+- hosts: webservers
+  serial: 1
+  roles:
+    - apps/hosts
+    - apps/django
+    - apps/gunicorn
