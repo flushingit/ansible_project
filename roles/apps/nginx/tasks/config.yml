@@ -1,0 +1,19 @@
+---
+
+- name: Configure nginx
+  block:
+    - name: update nginx config
+      template:
+        src: nginx.conf
+        dest: /etc/nginx/nginx.conf
+        owner: root
+      notify:
+        - reload nginx
+
+    - name: update upstream config
+      template:
+        src: load-balancer.conf
+        dest: /etc/nginx/conf.d/load-balancer.conf
+        owner: root
+      notify:
+        - reload nginx
