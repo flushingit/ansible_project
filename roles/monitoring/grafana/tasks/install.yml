@@ -14,4 +14,9 @@
     name: "{{ grafana.download_dir | default(grafana_defaults.download_dir) }}/{{ grafana.rpm | default(grafana_defaults.rpm) }}.rpm"
     state: present
     disable_gpg_check: yes
-  #      - "{{ grafana.download_dir | default(grafana_defaults.download_dir) }}/{{ grafana.rpm | default(grafana_defaults.rpm) }}.rpm"
+
+- name: Enable Grafana Service
+  systemd:
+    name: grafana-server
+    enabled: yes
+    masked: no

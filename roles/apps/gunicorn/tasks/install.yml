@@ -16,6 +16,22 @@
   notify:
     - restart gunicorn
 
+- name: Consul integration
+  block:
+    - name: Register service in Consul with healthcheck
+      import_role:
+        name: infra/consul_service-register
+      vars:
+        service_name: "django_exporter"
+        check_type: "http"
+        endpoint: "http://{{ ansible_host }}:{{ gunicorn_default.port }}/metrics"
+        port: "{{ gunicorn_default.port }}"
+      when: "'consul.service' in services"
+
+    - name: endpoint
+      debug:
+        msg: http://{{ ansible_host }}:{{ gunicorn_default.port }}/metrics
+
 - name: Firewalld
   block:
     - name: Open port

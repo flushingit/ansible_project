@@ -96,4 +96,8 @@
     - apps/django
     - apps/gunicorn
 
+- hosts: loadbalancer
+  roles:
+    - apps/nginx
+
 

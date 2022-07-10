@@ -2,18 +2,18 @@
 
 - name: Install prereq packages
   dnf:
-    name: git
+    name: '{{ item }}'
     state: present
-
-- name: Install prereq packages
-  yum:
-    name: postgresql-libs
-    state: present
-
-- name: Install prereq packages
-  yum:
-    name: postgresql-devel
-    state: present
+  with_items:
+    - git
+    - postgresql-libs
+    - postgresql-devel
+    - python3-virtualenv
+    - libxml2-devel
+    - libxslt-devel
+    - libffi-devel
+    - openssl-devel
+    - redhat-rpm-config
 
 - name: Prepare step for django
   block:

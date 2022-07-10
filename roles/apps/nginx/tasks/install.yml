@@ -1,0 +1,13 @@
+---
+
+- name: install nginx server
+  yum:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: Allow nginx connections on SeLinux
+  seboolean:
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes
