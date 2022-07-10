@@ -10,8 +10,11 @@
 
 - name: Create Settings File for Django
   template:
-    src: 'settings.py.j2'
-    dest: "{{ project.name_path }}/{{ project.name }}/settings.py"
+    src: "{{ item }}"
+    dest: "{{ project.name_path }}/{{ project.name }}/{{ item }}"
+  with_items:
+    - "settings.py"
+    - "urls.py"
 
 - name: Make executable manage.py
   file:
@@ -43,6 +46,7 @@
   with_items:
     - 'psycopg2'
     - 'consul_kv'
+    - 'django-prometheus'
 
 - name: Install specified python requirements in indicated (virtualenv)
   pip:
@@ -55,6 +59,7 @@
     app_path: "{{ project.name_path }}"
     settings: "{{ project.name }}.settings"
     virtualenv: "{{ project.name_path }}/env"
+  ignore_errors: true
 
 - name: apply django migrate
   django_manage:
@@ -62,6 +67,7 @@
     app_path: "{{ project.name_path }}"
     settings: "{{ project.name }}.settings"
     virtualenv: "{{project.name_path}}/env"
+  ignore_errors: true
 
 - name: Create default user
   django_manage:

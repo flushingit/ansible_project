@@ -6,3 +6,4 @@
     - apps/hosts
     - apps/django
     - apps/gunicorn
+    - apps/nginx
