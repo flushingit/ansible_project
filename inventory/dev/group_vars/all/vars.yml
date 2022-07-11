@@ -97,7 +97,7 @@ consul:
   data_dir: /home/consul
   service_dir: /home/consul/services
   version: 1.12.0
-  key: CzmvZMSgNXMr0mJHh1Z98w==
+#  key: CzmvZMSgNXMr0mJHh1Z98w==
 
 # PostgreSQL variables
 postgresql_version: "14"
@@ -109,10 +109,10 @@ postgresql_data_checksums: true  # for bootstrap only (initdb)
 postgresql_password_encryption_algorithm: "scram-sha-256"  # or "md5" if your clients do not work with passwords encrypted with SCRAM-SHA-256
 
 # (optional) list of users to be created (if not already exists)
-postgresql_users:
-  - {name: "django_test", password: "django_test1234"}
-  - {name: "django_test2", password: "django_test1234"}
-  - {name: "saleor_test", password: "saleor_test1234"}
+#postgresql_users:
+#  - {name: "django_test", password: "django_test1234"}
+#  - {name: "django_test2", password: "django_test1234"}
+#  - {name: "saleor_test", password: "saleor_test1234"}
 
 # (optional) list of databases to be created (if not already exists)
 postgresql_databases:
@@ -200,7 +200,7 @@ postgresql_pg_hba:
   - {type: "local", database: "all", user: "postgres", address: "", method: "trust"}  # "local=trust" required for ansible modules "postgresql_(user,db,ext)"
   - {type: "local", database: "all", user: "all", address: "", method: "peer"}
   - {type: "host", database: "all", user: "all", address: "127.0.0.1/32", method: "{{ postgresql_password_encryption_algorithm }}"}
-  - {type: "host", database: "all", user: "all", address: "192.168.1.1/24", method: "trust"}
+  - {type: "host", database: "all", user: "all", address: "192.168.1.1/24", method: "{{ postgresql_password_encryption_algorithm }}"}
 
 # list of lines that Patroni will use to generate pg_ident.conf
 postgresql_pg_ident: []
@@ -698,21 +698,21 @@ gunicorn_default:
   port: 9999
   workers: 5
 
-pg_django:
-  db_name: 'testapp'
-  user: 'django_test'
-  pass: 'django_test1234'
-  port: '5432'
-  cluster_name: 'postgres-cluster'
-
-django_default:
-  user_name: admin
-  user_password: adminTest1234
-  email: admin@local.local
-
-deploy_user:
-  name: deploy_user
-  passwd: '2Tdhj>70asda'
+#pg_django:
+#  db_name: 'testapp'
+#  user: 'django_test'
+#  pass: 'django_test1234'
+#  port: '5432'
+#  cluster_name: 'postgres-cluster'
+#
+#django_default:
+#  user_name: admin
+#  user_password: adminTest1234
+#  email: admin@local.local
+#
+#deploy_user:
+#  name: deploy_user
+#  passwd: '2Tdhj>70asda'
 
 
 
