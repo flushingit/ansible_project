@@ -20,9 +20,6 @@
     - grafana.ini
   notify: restart grafana
 
-#- name: Change admin password
-#  shell: "grafana-cli admin reset-admin-password {{ grafana_defaults.admin_password }}"
-
 - name: Get installed plugins
   shell: "ls -l | awk '{print $9}'"
   args:

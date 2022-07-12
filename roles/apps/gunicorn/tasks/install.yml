@@ -28,10 +28,6 @@
         port: "{{ gunicorn_default.port }}"
       when: "'consul.service' in services"
 
-    - name: endpoint
-      debug:
-        msg: http://{{ ansible_host }}:{{ gunicorn_default.port }}/metrics
-
 - name: Firewalld
   block:
     - name: Open port

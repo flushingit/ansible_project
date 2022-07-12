@@ -12,7 +12,6 @@
 
 - hosts: consul-cluster
   gather_facts: false
-#  serial: 1
   ignore_unreachable: true
   roles:
     - infra/consul-cluster
@@ -83,7 +82,6 @@
 
 - hosts: appservers
   gather_facts: false
-#  serial: 1
   ignore_unreachable: true
   roles:
     - monitoring/prometheus

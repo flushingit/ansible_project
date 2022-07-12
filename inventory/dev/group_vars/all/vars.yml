@@ -97,22 +97,15 @@ consul:
   data_dir: /home/consul
   service_dir: /home/consul/services
   version: 1.12.0
-#  key: CzmvZMSgNXMr0mJHh1Z98w==
+
 
 # PostgreSQL variables
 postgresql_version: "14"
-# postgresql_data_dir: see vars/Debian.yml or vars/RedHat.yml
 postgresql_port: "5432"
 postgresql_encoding: "UTF8"  # for bootstrap only (initdb)
 postgresql_locale: "en_US.UTF-8"  # for bootstrap only (initdb)
 postgresql_data_checksums: true  # for bootstrap only (initdb)
 postgresql_password_encryption_algorithm: "scram-sha-256"  # or "md5" if your clients do not work with passwords encrypted with SCRAM-SHA-256
-
-# (optional) list of users to be created (if not already exists)
-#postgresql_users:
-#  - {name: "django_test", password: "django_test1234"}
-#  - {name: "django_test2", password: "django_test1234"}
-#  - {name: "saleor_test", password: "saleor_test1234"}
 
 # (optional) list of databases to be created (if not already exists)
 postgresql_databases:
@@ -231,9 +224,6 @@ patroni_master_start_timeout: 300
 patroni_standby_cluster:
   host: ""  # an address of remote master
   port: "5432"  # a port of remote master
-#  primary_slot_name: ""  # which slot on the remote master to use for replication (optional)
-#  restore_command: ""  # command to restore WAL records from the remote master to standby leader (optional)
-#  recovery_min_apply_delay: ""  # how long to wait before actually apply WAL records on a standby leader (optional)
 
 patroni_log_destination: stderr  # or 'logfile'
 # if patroni_log_destination: logfile
@@ -285,9 +275,6 @@ pg_probackup:
 
 # "restore_command" written to recovery.conf when configuring follower (create replica)
 postgresql_restore_command: ""
-# postgresql_restore_command: "wal-g wal-fetch %f %p"  # restore WAL-s using WAL-G
-# postgresql_restore_command: "pgbackrest --stanza={{ pgbackrest_stanza }} archive-get %f %p"  # restore WAL-s using pgbackrest
-# postgresql_restore_command: "pg_probackup-{{ pg_probackup_version }} archive-get -B {{ pg_probackup_dir }} --instance {{ pg_probackup_instance }} --wal-file-path=%p --wal-file-name=%f"  # restore WAL-s using pg_probackup
 
 # pg_probackup
 pg_probackup_install: false  # or 'true'
@@ -311,9 +298,6 @@ wal_g_json:  # more options see https://github.com/wal-g/wal-g#configuration
   - {option: "WALG_COMPRESSION_METHOD", value: "brotli"}
   - {option: "PGDATA", value: "{{ postgresql_data_dir }}"}
   - {option: "PGHOST", value: "{{ postgresql_unix_socket_dir }}"}
-#  - {option: "AWS_REGION", value: "us-east-1"}
-#  - {option: "WALG_S3_CA_CERT_FILE", value: "/path/to/custom/ca/file"}
-#  - {option: "", value: ""}
 wal_g_patroni_cluster_bootstrap_command: "wal-g backup-fetch {{ postgresql_data_dir }} LATEST"
 
 # pgBackRest
@@ -340,11 +324,6 @@ pgbackrest_conf:
 #    - {option: "", value: ""}
 pgbackrest_patroni_cluster_restore_command:
   '/usr/bin/pgbackrest --stanza={{ pgbackrest_stanza }} --delta restore'  # restore from latest backup
-#  '/usr/bin/pgbackrest --stanza={{ pgbackrest_stanza }} --type=time "--target=2020-06-01 11:00:00+03" --delta restore'  # Point-in-Time Recovery (example)
-
-# PITR mode (if patroni_cluster_bootstrap_method: "pgbackrest" or "wal-g"):
-# 1) The database cluster directory will be cleaned (for "wal-g") or overwritten (for "pgbackrest" --delta restore).
-# 2) And also the patroni cluster "{{ patroni_cluster_name }}" will be removed from the DCS (if exist) before recovery.
 
 disable_archive_command: true  # or 'false' to not disable archive_command after restore
 keep_patroni_dynamic_json: true  # or 'false' to remove patroni.dynamic.json after restore (if exists)
@@ -355,7 +334,6 @@ netdata_install: false  # or 'true' for install Netdata on postgresql cluster no
 netdata_install_options: "--stable-channel --disable-telemetry --dont-wait"
 netdata_conf:
   web_bind_to: "*"
-  # https://learn.netdata.cloud/docs/store/change-metrics-storage
   memory_mode: "dbengine"  # The long-term metrics storage with efficient RAM and disk usage.
   page_cache_size: 64  # Determines the amount of RAM in MiB that is dedicated to caching Netdata metric values.
   dbengine_disk_space: 1024  # Determines the amount of disk space in MiB that is dedicated to storing Netdata metric values.
@@ -380,11 +358,6 @@ postgresql_version_terse: "{{ postgresql_version | replace('.', '') }}"
 
 # Repository
 yum_repository: []
-#  - name: "repo name"
-#    description: "repo description"
-#    baseurl: "https://my-repo.url"
-#    gpgkey: "https://my-repo-key.url"
-#    gpgcheck: "yes"
 
 install_epel_repo: true  # or 'false' (installed from the package "epel-release-latest.noarch.rpm")
 install_postgresql_repo: true  # or 'false' (installed from the package "pgdg-redhat-repo-latest.noarch.rpm")
@@ -426,14 +399,12 @@ system_packages:
 glibc_langpack:
   - "glibc-langpack-en"
   - "glibc-langpack-ru"  # optional
-#  - "glibc-langpack-de"
 
 postgresql_packages:
   - postgresql{{ postgresql_version_terse }}
   - postgresql{{ postgresql_version_terse }}-server
   - postgresql{{ postgresql_version_terse }}-contrib
   - postgresql{{ postgresql_version_terse }}-devel
-#  - pg_repack{{ postgresql_version_terse }}
 
 # Extra packages
 etcd_package_repo: "https://github.com/etcd-io/etcd/releases/download/{{ etcd_ver }}/etcd-{{ etcd_ver }}-linux-amd64.tar.gz"
@@ -457,34 +428,11 @@ patroni_installation_method: "pip"  # (default)"pip" or "rpm"
 # Packages from your repository will be used to install instead of the pip repository.
 pip_package_repo: "https://bootstrap.pypa.io/get-pip.py"  # latest version pip3 for python3 (or use "pip-<version>.tar.gz").
 patroni_pip_requirements_repo: []
-#  - "http://my-repo.url/setuptools-41.2.0.zip"
-#  - "http://my-repo.url/setuptools_scm-3.3.3.tar.gz"
-#  - "http://my-repo.url/urllib3-1.24.3.tar.gz"
-#  - "http://my-repo.url/boto-2.49.0.tar.gz" # (interfaces to Amazon Web Services)
-#  - "http://my-repo.url/PyYAML-5.1.2.tar.gz"
-#  - "http://my-repo.url/chardet-3.0.4.tar.gz"
-#  - "http://my-repo.url/idna-2.8.tar.gz"
-#  - "http://my-repo.url/certifi-2019.9.11.tar.gz"
-#  - "http://my-repo.url/requests-2.22.0.tar.gz"
-#  - "http://my-repo.url/six-1.12.0.tar.gz"
-#  - "http://my-repo.url/kazoo-2.6.1.tar.gz"
-#  - "http://my-repo.url/dnspython-1.16.0.zip"
-#  - "http://my-repo.url/python-etcd-0.4.5.tar.gz"
-#  - "http://my-repo.url/Click-7.0.tar.gz"
-#  - "http://my-repo.url/prettytable-0.7.2.tar.gz"
-#  - "http://my-repo.url/pytz-2019.2.tar.gz"
-#  - "http://my-repo.url/tzlocal-2.0.0.tar.gz"
-#  - "http://my-repo.url/wheel-0.33.6.tar.gz"
-#  - "http://my-repo.url/python-dateutil-2.8.0.tar.gz"
-#  - "http://my-repo.url/psutil-5.6.3.tar.gz"
-#  - "http://my-repo.url/cdiff-1.0.tar.gz"
 patroni_pip_package_repo: []
-#  - "http://my-repo.url/patroni-1.6.0.tar.gz"
 
 # (if patroni_installation_type: "rpm")
 # You can preload the patroni rpm package to your YUM repository, or explicitly specify the path to the package in this variable:
 patroni_rpm_package_repo: []
-#  - "https://github.com/cybertec-postgresql/patroni-packaging/releases/download/1.6.5-1/patroni-1.6.5-1.rhel7.x86_64.rpm"  # (package for RHEL/CentOS 7)
 
 patroni_pip_package_file:
   - "patroni-1.6.0.tar.gz"  # https://pypi.org/project/patroni/#files
@@ -544,19 +492,11 @@ patroni_etcd_hosts: []
 #  - { host: "10.128.64.142", port: "2379" }
 #  - { host: "10.128.64.143", port: "2379" }
 
-# more options you can specify in the roles/patroni/templates/patroni.yml.j2
-# https://patroni.readthedocs.io/en/latest/SETTINGS.html#etcd
-# https://patroni.readthedocs.io/en/latest/SETTINGS.html#consul
-
 # DNS servers (/etc/resolv.conf)
 nameservers: []
-#  - "8.8.8.8"  # example (Google Public DNS)
-#  - "9.9.9.9"  # (Quad9 Public DNS)
 
 # /etc/hosts (optional)
 etc_hosts: []
-#  - "10.128.64.143 pgbackrest.minio.local minio.local s3.eu-west-3.amazonaws.com"  # example (MinIO)
-#  - ""
 
 # Generate locale
 # (except RHEL>=8,use glibc-langpack)
@@ -587,7 +527,6 @@ sysctl_conf:
     - {name: "vm.dirty_expire_centisecs", value: "1000"}
     - {name: "vm.dirty_background_bytes", value: "67108864"}
     - {name: "vm.dirty_bytes", value: "536870912"}
-#    - {name: "vm.nr_hugepages", value: "9510"}  # example "9510"=18GB
     - {name: "vm.zone_reclaim_mode", value: "0"}
     - {name: "kernel.numa_balancing", value: "0"}
     - {name: "kernel.sched_migration_cost_ns", value: "5000000"}
@@ -600,7 +539,6 @@ sysctl_conf:
     - {name: "net.ipv4.tcp_max_syn_backlog", value: "8192"}
     - {name: "net.core.somaxconn", value: "65535"}
     - {name: "net.ipv4.tcp_tw_reuse", value: "1"}
-#    - {name: "", value: ""}
   balancers:
     - {name: "net.ipv4.ip_nonlocal_bind", value: "1"}
     - {name: "net.ipv4.ip_forward", value: "1"}
@@ -610,19 +548,16 @@ sysctl_conf:
     - {name: "net.ipv4.tcp_max_syn_backlog", value: "8192"}
     - {name: "net.core.somaxconn", value: "65535"}
     - {name: "net.ipv4.tcp_tw_reuse", value: "1"}
-#    - {name: "", value: ""}
 
 
 # Transparent Huge Pages
 disable_thp: true  # or 'false'
-
 
 # Max open file limit
 set_limits: true  # or 'false'
 limits_user: "postgres"
 soft_nofile: 65536
 hard_nofile: 200000
-
 
 # SSH Keys (optional)
 enable_ssh_key_based_authentication: false  # or 'true' for configure SSH Key-Based Authentication
@@ -636,21 +571,12 @@ sudo_users:
   - name: "postgres"
     nopasswd: "yes"  # or "no" to require a password
     commands: "ALL"
-#  - name: "joe" # other user (example)
-#    nopasswd: "no"
-#    commands: "/usr/bin/find, /usr/bin/less, /usr/bin/tail, /bin/kill"
 
 # (optional) - Fetch files from the server in the "master" group. These files can later be copied to all servers.
 fetch_files_from_master: []
-#  - {src: "/etc/ssl/certs/ssl-cert-snakeoil.pem", dest: "files/ssl-cert-snakeoil.pem"}
-#  - {src: "/etc/ssl/private/ssl-cert-snakeoil.key", dest: "files/ssl-cert-snakeoil.key"}
-#  - {src: "/path/to/myfile", dest: "files/myfile"}
 
 # (optional) - Copy this files to all servers in the cluster ("master" and "replica" groups)
 copy_files_to_all_server: []
-#  - {src: "files/ssl-cert-snakeoil.pem", dest: "/etc/ssl/certs/ssl-cert-snakeoil.pem", owner: "postgres", group: "postgres", mode: "0644"}
-#  - {src: "files/ssl-cert-snakeoil.key", dest: "/etc/ssl/private/ssl-cert-snakeoil.key", owner: "postgres", group: "postgres", mode: "0600"}
-#  - {src: "files/myfile", dest: "/path/to/myfile", owner: "postgres", group: "postgres", mode: "0640"}
 
 #Prometheus
 prometheus:
@@ -697,24 +623,5 @@ project:
 gunicorn_default:
   port: 9999
   workers: 5
-
-#pg_django:
-#  db_name: 'testapp'
-#  user: 'django_test'
-#  pass: 'django_test1234'
-#  port: '5432'
-#  cluster_name: 'postgres-cluster'
-#
-#django_default:
-#  user_name: admin
-#  user_password: adminTest1234
-#  email: admin@local.local
-#
-#deploy_user:
-#  name: deploy_user
-#  passwd: '2Tdhj>70asda'
-
-
-
 
 

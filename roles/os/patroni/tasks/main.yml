@@ -152,13 +152,6 @@
   tags: patroni, patroni_install
 
 - block:  # installation_method: "repo" and patroni_installation_method: "rpm/deb"
-    # Debian
-    - name: Install patroni package
-      package:
-        name: patroni
-        state: present
-      when: ansible_os_family == "Debian" and patroni_deb_package_repo | length < 1
-
     # RedHat
     - name: Install patroni package
       package:
@@ -167,25 +160,7 @@
       when: ansible_os_family == "RedHat" and patroni_rpm_package_repo | length < 1
 
     # when patroni_deb_package_repo or patroni_rpm_package_repo URL is defined
-    # Debian
-    - name: Download patroni deb package
-      get_url:
-        url: "{{ item }}"
-        dest: /tmp/
-        timeout: 60
-        validate_certs: false
-      loop: "{{ patroni_deb_package_repo | list }}"
-      when: ansible_os_family == "Debian" and patroni_deb_package_repo | length > 0
-
-    - name: Install patroni from deb package
-      apt:
-        force_apt_get: true
-        deb: "/tmp/{{ item }}"
-        state: present
-      loop: "{{ patroni_deb_package_repo | map('basename') | list }}"
-      when: ansible_os_family == "Debian" and patroni_deb_package_repo | length > 0
-
-    # RedHat
+        # RedHat
     - name: Download patroni rpm package
       get_url:
         url: "{{ item }}"
@@ -207,21 +182,7 @@
 
 # installation_method: "file" and patroni_installation_method: "rpm/deb"
 - block:
-    # Debian
-    - name: Copy patroni deb package into /tmp
-      copy:
-        src: "{{ patroni_deb_package_file }}"
-        dest: /tmp/
-      when: ansible_os_family == "Debian"
-
-    - name: Install patroni from deb package
-      apt:
-        force_apt_get: true
-        deb: "/tmp/{{ patroni_deb_package_file | basename }}"
-        state: present
-      when: ansible_os_family == "Debian"
-
-    # RedHat
+      # RedHat
     - name: Copy patroni rpm package into /tmp
       copy:
         src: "{{ patroni_rpm_package_file }}"
@@ -383,37 +344,6 @@
       register: pgdata_initialized
       when: patroni_cluster_bootstrap_method == "initdb"
 
-#    - name: Prepare PostgreSQL | data directory check result
-#      fail:
-#        msg: "Whoops! data directory {{ postgresql_data_dir }} is already initialized"
-#      when: pgdata_initialized.stat.exists is defined and
-#            pgdata_initialized.stat.exists
-#      tags: patroni, patroni_check_init
-
-      # for Debian based distros only
-      # patroni bootstrap failure is possible if the postgresql config files are missing
-    - name: Prepare PostgreSQL | make sure the postgresql config files exists
-      stat:
-        path: "{{ postgresql_conf_dir }}/postgresql.conf"
-      register: postgresql_conf_file
-      when: ansible_os_family == "Debian" and
-            postgresql_packages|join(" ") is not search("postgrespro")
-
-    - name: Prepare PostgreSQL | generate default postgresql config files
-      become: true
-      become_user: postgres
-      command: >
-        /usr/bin/pg_createcluster {{ postgresql_version }} {{ postgresql_cluster_name }}
-        -d {{ postgresql_data_dir }}
-        -p {{ postgresql_port }}
-        -e {{ postgresql_encoding }}
-        --locale {{ postgresql_locale }}
-      register: pg_createcluster_result
-      failed_when: pg_createcluster_result.rc != 0
-      when: (ansible_os_family == "Debian" and
-            postgresql_packages|join(" ") is not search("postgrespro")) and
-            not postgresql_conf_file.stat.exists
-
     - name: Prepare PostgreSQL | make sure the data directory "{{ postgresql_data_dir }}" is empty
       file:
         path: "{{ postgresql_data_dir }}"
@@ -463,15 +393,6 @@
           failed_when:
             - pg_ctl_status_result.rc != 0
             - pg_ctl_status_result.rc != 3
-
-          # "Debian"
-        - name: Prepare PostgreSQL | start PostgreSQL on Master
-          become: true
-          become_user: postgres
-          command: "/usr/bin/pg_ctlcluster {{ postgresql_version }} {{ postgresql_cluster_name }} start"
-          register: pg_start_on_master
-          when: pg_ctl_status_result.rc == 3 and
-                (ansible_os_family == "Debian" and postgresql_packages|join(" ") is not search("postgrespro"))
 
           # "RedHat" or PostgresPro
         - name: Prepare PostgreSQL | start PostgreSQL on Master
@@ -553,14 +474,6 @@
       retries: 300
       delay: 10
       when: pg_ctl_status_result.rc == 0
-
-      # "Debian"
-    - name: Prepare PostgreSQL | stop PostgreSQL (will be managed by patroni)
-      become: true
-      become_user: postgres
-      command: "/usr/bin/pg_ctlcluster {{ postgresql_version }} {{ postgresql_cluster_name }} stop -m fast -- -w -t 600"
-      when: (checkpoint_result.rc is defined and checkpoint_result.rc == 0) and
-            (ansible_os_family == "Debian" and postgresql_packages|join(" ") is not search("postgrespro"))
 
       # "RedHat" or PostgresPro
     - name: Prepare PostgreSQL | stop PostgreSQL (will be managed by patroni)
@@ -940,24 +853,6 @@
   tags: patroni, custom_wal_dir
 
 # disable postgresql from autostart
-- block:  # "Debian"
-    - name: Turning off postgresql autostart from config "start.conf" (will be managed by patroni)
-      copy:
-        dest: "{{ postgresql_conf_dir }}/start.conf"
-        content: "manual"
-        owner: postgres
-        group: postgres
-        mode: 0644
-
-    - name: Disable "postgresql@{{ postgresql_version }}-{{ postgresql_cluster_name }}" service
-      systemd:
-        name: "postgresql@{{ postgresql_version }}-{{ postgresql_cluster_name }}"
-        enabled: false
-        daemon_reload: true
-  when: ansible_os_family == "Debian" and
-        postgresql_packages|join(" ") is not search("postgrespro")
-  tags: patroni, postgresql_disable
-
 # "RedHat"
 - name: Disable "postgresql-{{ postgresql_version }}" service (will be managed by patroni)
   systemd:

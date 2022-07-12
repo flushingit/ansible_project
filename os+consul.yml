@@ -2,7 +2,7 @@
 
 - hosts: appservers, database , webservers,
   ignore_unreachable: true
-  serial: 1
+  serial: 3
   roles:
     - os/packages
     - os/chrony
@@ -12,7 +12,6 @@
 
 - hosts: consul-cluster
   gather_facts: false
-  serial: 1
   ignore_unreachable: true
   roles:
     - infra/consul-cluster

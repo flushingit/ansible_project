@@ -1,13 +1,5 @@
 ---
 
-### consul keygen
-#- name: Consul encryption key generation
-#  shell: consul keygen
-#  register: consul_encrypt_key
-#
-#- set_fact:
-#    consul_key: "{{ consul_encrypt_key.stdout }}"
-
 - name: File processing
   block:
     - name: Add config.json file

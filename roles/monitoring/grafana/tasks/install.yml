@@ -5,7 +5,6 @@
     src: "{{ item }}"
     dest: "{{ grafana.download_dir | default(grafana_defaults.download_dir) }}"
     mode: 0755
-#    remote_src: true
   with_items:
     - "{{ grafana.rpm | default(grafana_defaults.rpm) }}.rpm"
 
